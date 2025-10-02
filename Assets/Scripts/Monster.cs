@@ -5,6 +5,11 @@ public enum TextType
     Normal, Critical
 }
 
+public enum MonsterState
+{
+    Idle, Walk, Attack, Stun, Skill, Die
+}
+
 public abstract class BaseState<T>
 {
     public abstract void Enter(T state);

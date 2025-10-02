@@ -1,108 +1,64 @@
+using DG.Tweening;
+using System.Collections;
+using TMPro;
 using UnityEngine;
-
-public enum StageState
-{
-    None, Start, Wait, Exit
-}
-
-public class StageNone : BaseState<StageManager>
-{
-    public override void Enter(StageManager state)
-    {
-    }
-
-    public override void Exit(StageManager state)
-    {
-    }
-
-    public override void FixedUpdate(StageManager state)
-    {
-    }
-
-    public override void Update(StageManager state)
-    {
-    }
-}
-
-public class StageStart : BaseState<StageManager>
-{
-    public override void Enter(StageManager state)
-    {
-    }
-
-    public override void Exit(StageManager state)
-    {
-    }
-
-    public override void FixedUpdate(StageManager state)
-    {
-    }
-
-    public override void Update(StageManager state)
-    {
-    }
-}
-
-public class StageWait : BaseState<StageManager>
-{
-    public override void Enter(StageManager state)
-    {
-    }
-
-    public override void Exit(StageManager state)
-    {
-    }
-
-    public override void FixedUpdate(StageManager state)
-    {
-    }
-
-    public override void Update(StageManager state)
-    {
-    }
-}
-
-public class StageExit : BaseState<StageManager>
-{
-    public override void Enter(StageManager state)
-    {
-    }
-
-    public override void Exit(StageManager state)
-    {
-    }
-
-    public override void FixedUpdate(StageManager state)
-    {
-    }
-
-    public override void Update(StageManager state)
-    {
-    }
-}
-
-
 
 public class StageManager : Singleton<StageManager>
 {
-    [SerializeField] private Transform[] startPos;
-    public StageState stageState;
-    private StateMachine<StageState, StageManager> stateMachine = new StateMachine<StageState, StageManager> ();
+    public Stage[] stage;
+    public Transform[] startPos;
+    public bool isStage = false;
+    public int stageIndex;
+    [SerializeField] private TextMeshProUGUI startText;
+    private Vector3 originPos;
 
     private new void Awake()
     {
         base.Awake();
-        stateMachine.Reset(this);
-        stateMachine.AddState(StageState.None, new StageNone());
-        stateMachine.AddState(StageState.Start, new StageStart());
-        stateMachine.AddState(StageState.Wait, new StageWait());
-        stateMachine.AddState(StageState.Exit, new StageExit());
-        ChangeState(StageState.None);
+        originPos = startText.transform.localScale;
     }
 
-    public void ChangeState(StageState state)
+    private void Start()
     {
-        stateMachine.ChangeState(state);
-        stageState = state;
+        MonsterSetting();
+    }
+
+    public void MonsterSetting()
+    {
+        for(int i = 0; i < stage[stageIndex].monsterSpawns.Length; i++)
+        {
+            MonsterSpawn spawn = stage[stageIndex].monsterSpawns[i];
+            GameObject monster = Instantiate(spawn.monsterPrefab, startPos[spawn.index]);
+            monster.transform.localPosition = Vector3.zero;
+            monster.SetActive(true);
+        }
+    }
+
+    public void StageStart()
+    {
+        StartCoroutine(StartCo());
+    }
+
+    private IEnumerator StartCo()
+    {
+        startText.gameObject.SetActive(true);
+        startText.text = "3";
+        startText.transform.localScale = originPos;
+        startText.transform.DOScale(Vector3.one, 0.5f);
+        yield return new WaitForSeconds(1f);
+        startText.text = "2";
+        startText.transform.localScale = originPos;
+        startText.transform.DOScale(Vector3.one, 0.5f);
+        yield return new WaitForSeconds(1f);
+        startText.text = "1";
+        startText.transform.localScale = originPos;
+        startText.transform.DOScale(Vector3.one, 0.5f);
+        yield return new WaitForSeconds(1f);
+        startText.text = "Start";
+        startText.transform.localScale = originPos;
+        startText.transform.DOScale(Vector3.one, 0.5f);
+        yield return new WaitForSeconds(1f);
+        startText.gameObject.SetActive(false);
+        isStage = true;
     }
 }
