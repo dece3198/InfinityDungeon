@@ -14,6 +14,7 @@ public class MercenaryWalk : BaseState<MercenaryController>
     public override void Enter(MercenaryController state)
     {
         state.animator.SetBool("Move", true);
+        state.rigid.isKinematic = false;
     }
 
     public override void Exit(MercenaryController state)
@@ -39,13 +40,19 @@ public class MercenaryWalk : BaseState<MercenaryController>
 
         if(dist <= 0.1f)
         {
-            if(state.posIndex == 4)
+            if (state.posIndex == 4)
             {
                 state.ChangeState(MercenaryState.Give);
             }
-            else if(state.posIndex == 5)
+            else if (state.posIndex == 5)
             {
                 state.ChangeState(MercenaryState.Sit);
+            }
+            else if (state.posIndex == 7)
+            {
+                state.posIndex = 0;
+                state.paper.SetActive(true);
+                MercenarySpawner.instance.EnterPool(state.gameObject);
             }
             else
             {
@@ -97,9 +104,10 @@ public class MercenaryGive : BaseState<MercenaryController>
             yield return null;
         }
         yield return new WaitForSeconds(0.25f);
-        state.paper.transform.parent = LobbyManager.instance.paperPos;
         state.paper.transform.DOMove(LobbyManager.instance.paperPos.position, 0.25f).SetEase(Ease.Linear);
         yield return new WaitForSeconds(0.25f);
+        state.paper.transform.position = state.paperPos.position;
+        state.paper.transform.rotation = state.paperPos.rotation;
         state.paper.SetActive(false);
         LobbyManager.instance.paper.SetActive(true);
         yield return new WaitForSeconds(1f);
@@ -112,6 +120,7 @@ public class MercenarySit : BaseState<MercenaryController>
 {
     public override void Enter(MercenaryController state)
     {
+        MercenarySpawner.instance.next.SetActive(true);
         state.animator.SetBool("Move", false);
         state.animator.SetTrigger("Sit");
 
@@ -163,6 +172,8 @@ public class MercenaryController : MonoBehaviour
     public float def;
     public float atkSpeed;
     public float speed;
+    public float criticalP;
+    public float criticalD;
 
 
     public Mercenary mercenary;
@@ -173,6 +184,7 @@ public class MercenaryController : MonoBehaviour
     public GameObject paper;
     public MercenaryState mercenaryState;
     private Vector3 orignPos;
+    public Transform paperPos;
 
     public bool isMove;
     public bool isWait;
@@ -185,26 +197,29 @@ public class MercenaryController : MonoBehaviour
         stateMachine.AddState(MercenaryState.Walk, new MercenaryWalk());
         stateMachine.AddState(MercenaryState.Give, new MercenaryGive());
         stateMachine.AddState(MercenaryState.Sit, new MercenarySit());
-        ChangeState(MercenaryState.Walk);
     }
 
     private void OnEnable()
     {
-        mercenary.isCharacterImageFake = Random.value < 0.3f;
-        mercenary.isCoatingImageFake = Random.value < 0.3f;
-        mercenary.isInsigniaFake = Random.value < 0.3f;
+        LobbyManager.instance.curMercenary = this;
+        paper.SetActive(true);
+        ChangeState(MercenaryState.Walk);
+        mercenary.isCharacterImageFake = Random.value < 0.2f;
+        mercenary.isCoatingImageFake = Random.value < 0.2f;
+        mercenary.isInsigniaFake = Random.value < 0.2f;
 
         mercenary.CalculateStats();
 
-        ApplyFakeStatModifier();
+        LobbyManager.instance.PaperSetting();
 
-        LobbyManager.instance.PaperSetting(mercenary);
+        ApplyFakeStatModifier();
 
         atk = mercenary.atk;
         def = mercenary.def;
         Hp = mercenary.hp;
         maxHp = Hp;
-        speed = mercenary.speed;
+        criticalP = mercenary.criticalPercent;
+        criticalD = mercenary.criticalDamage;
     }
 
     public void FixedUpdate()

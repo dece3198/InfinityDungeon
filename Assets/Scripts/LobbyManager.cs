@@ -27,21 +27,51 @@ public static class StatTable
 
     public static readonly Dictionary<Rank, int> insignia = new()
     {
-        { Rank.S, 3 }, { Rank.A, 2 }, { Rank.B, 1 },
+        { Rank.S, 4 }, { Rank.A, 3 }, { Rank.B, 2 },
         { Rank.C, 1 }, { Rank.D, 0 }, { Rank.E, 0 }, { Rank.F, 0 }
+    };
+
+    public static readonly Dictionary<Rank, int> Price = new()
+    {
+        { Rank.S, 200}, { Rank.A, 150}, { Rank.B, 100},
+        { Rank.C, 50}, { Rank.D, 25 }, { Rank.E, 10 }, { Rank.F, 0 }
     };
 }
 
 
 public class LobbyManager : Singleton<LobbyManager>
 {
+    [SerializeField] private int gold;
+    public int Gold
+    {
+        get { return gold; }
+        set 
+        {
+            gold = value;
+            goldText.text = gold.ToString();
+        }
+    }
+
+    [SerializeField] private TextMeshProUGUI goldText;
+
     [SerializeField] private GameObject subCam;
+    [SerializeField] private GameObject dictionaryUi;
+    [SerializeField] private GameObject statsUi;
     [SerializeField] private RectTransform fadeInOut;
+    [SerializeField] private GameObject checkUi;
+    [SerializeField] private TextMeshProUGUI checkText;
+    [SerializeField] private TextMeshProUGUI priceText;
+    private int checkIndex;
+    private int recruitmentIndex;
     public Transform[] roads;
     public Transform sitPos;
     public Transform paperPos;
     private Vector2 orignPos;
     private bool isCheck = false;
+    private bool isDictionary = false;
+    private bool isStats = false;
+    private bool isConversion = false;
+    public MercenaryController curMercenary;
 
     [SerializeField] private Insignia[] insignias;
     [SerializeField] private Insignia[] fakeInsignias;
@@ -68,8 +98,11 @@ public class LobbyManager : Singleton<LobbyManager>
     [SerializeField] private TextMeshProUGUI weaponRankText;
     [SerializeField] private TextMeshProUGUI armorRankText;
 
+    [SerializeField] private TextMeshProUGUI[] statsTexts;
+
     private void Start()
     {
+        Gold += 500;
         orignPos = new Vector2(5000, 5000);
         fadeInOut.sizeDelta = Vector2.zero;
         StartCoroutine(FadeOut());
@@ -82,8 +115,14 @@ public class LobbyManager : Singleton<LobbyManager>
         yield return new WaitForSeconds(1f);
     }
 
-    public void PaperSetting(Mercenary mercenary)
+    public void PaperSetting()
     {
+
+        for(int i = 0; i < slots.Length; i++)
+        {
+            slots[i].ClearSlot();
+        }
+        Mercenary mercenary = curMercenary.mercenary;
         int rand = Random.Range(0, 3);
         int ageValue = StatTable.Age[mercenary.ageRank];
         int heightValue = StatTable.Height[mercenary.heightRank];
@@ -94,7 +133,7 @@ public class LobbyManager : Singleton<LobbyManager>
         string age = $"Age : {ageValue}";
         string rank = $"{mercenary.mercenaryRank.ToString()}";
 
-        
+
         nameText.text = name;
         nameTextUi.text = name;
         classText.text = mercenaryClass;
@@ -107,7 +146,7 @@ public class LobbyManager : Singleton<LobbyManager>
         weightText.text = $"Weight : {weightValue}kg";
         weaponRankText.text = $"{mercenary.weaponRank.ToString()}";
         armorRankText.text = $"{mercenary.armorRank.ToString()}";
-
+        priceText.text = $"Price : {StatTable.Price[mercenary.mercenaryRank]}Gold";
 
         if (mercenary.isCharacterImageFake)
         {
@@ -118,7 +157,7 @@ public class LobbyManager : Singleton<LobbyManager>
             mercenaryImage.sprite = mercenary.mercenaryImage;
         }
 
-        if(mercenary.isCoatingImageFake)
+        if (mercenary.isCoatingImageFake)
         {
             coatingImage.sprite = GetRandomFakeImage(mercenary, fakeCoatingImages);
         }
@@ -127,34 +166,36 @@ public class LobbyManager : Singleton<LobbyManager>
             coatingImage.sprite = realCoatingImage;
         }
 
-        if(mercenary.mercenaryRank >= Rank.A)
+        if (mercenary.mercenaryRank >= Rank.A)
         {
             AddSlot(mercenary.insignia);
         }
-        
-        if(mercenary.isInsigniaFake)
+
+        if (mercenary.isInsigniaFake)
         {
             int randCount = Random.Range(1, 4);
 
             List<Insignia> pool = new List<Insignia>(fakeInsignias);
 
-            
-            for(int i = 0; i < randCount && pool.Count > 0; i++)
+
+            for (int i = 0; i < randCount && pool.Count > 0; i++)
             {
                 int randomIndex = Random.Range(0, pool.Count);
-                AddSlot(fakeInsignias[randomIndex]);
+                AddSlot(pool[randomIndex]);
                 pool.RemoveAt(randomIndex);
             }
         }
         else
         {
-            if(mercenary.mercenaryRank >= Rank.C)
+            if (mercenary.mercenaryRank >= Rank.C)
             {
                 int maxCount = StatTable.insignia[mercenary.mercenaryRank];
-                int randCount = Random.Range(0, maxCount + 1);
+                int randCount = Random.Range(1, maxCount);
                 AddRandomInsignia(mercenary, insignias, randCount);
             }
         }
+
+        mercenary.RoundStats();
     }
 
     private void AddRandomInsignia(Mercenary mercenary, Insignia[] pool, int count)
@@ -176,9 +217,9 @@ public class LobbyManager : Singleton<LobbyManager>
                 }
             }
 
-            mercenary.atk = chosen.atk;
-            mercenary.def = chosen.def;
-            mercenary.hp = chosen.hp;
+            mercenary.atk += chosen.atk;
+            mercenary.def += chosen.def;
+            mercenary.hp += chosen.hp;
 
             AddSlot(chosen);
             candidates.RemoveAt(randomIndex);
@@ -187,9 +228,9 @@ public class LobbyManager : Singleton<LobbyManager>
 
     private void AddSlot(Insignia insignia)
     {
-        for(int i = 0; i < slots.Length; i++)
+        for (int i = 0; i < slots.Length; i++)
         {
-            if(slots[i].insignia == null)
+            if (slots[i].insignia == null)
             {
                 slots[i].AddSlot(insignia);
                 return;
@@ -204,10 +245,118 @@ public class LobbyManager : Singleton<LobbyManager>
         return candidates[Random.Range(0, candidates.Count)];
     }
 
-    public void CheckButton()
+    public void ConversionButton()
+    {
+        isConversion = !isConversion;
+
+        subCam.SetActive(isConversion);
+    }
+
+    public void DictionaryUiOpen()
+    {
+        isDictionary = !isDictionary;
+
+        if (isDictionary)
+        {
+            dictionaryUi.SetActive(true);
+            dictionaryUi.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
+        }
+        else
+        {
+            dictionaryUi.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.Linear);
+            dictionaryUi.SetActive(false);
+        }
+    }
+
+    public void CheckUi(int index)
     {
         isCheck = !isCheck;
 
-        subCam.SetActive(isCheck);
+        if(isCheck)
+        {
+            checkUi.SetActive(true);
+            switch (index)
+            {
+                case 0: checkText.text = "Would you like to recruit mercenaries?"; break;
+                case 1: checkText.text = "Would you like to check the stats?"; break;
+            }
+            checkIndex = index;
+        }
+        else
+        {
+            checkUi.SetActive(false);
+        }
+
+    }
+
+    public void IndexButton()
+    {
+        isCheck = false;
+        checkUi.SetActive(false);
+        switch (checkIndex)
+        {
+            case 0: Recruit(); break;
+            case 1: StatsCheck(); break;
+        }
+    }
+
+    private void StatsCheck()
+    {
+        isStats = !isStats;
+
+        if (isStats)
+        {
+            Gold -= 3;
+            statsUi.SetActive(true);
+            StartCoroutine(ShowPowerCo(statsTexts[0], curMercenary.atk));
+            StartCoroutine(ShowPowerCo(statsTexts[1], curMercenary.def));
+            StartCoroutine(ShowPowerCo(statsTexts[2], curMercenary.Hp));
+            StartCoroutine(ShowPowerCo(statsTexts[3], curMercenary.mercenary.speed));
+            StartCoroutine(ShowPowerCo(statsTexts[4], curMercenary.criticalP * 100));
+            StartCoroutine(ShowPowerCo(statsTexts[5], curMercenary.criticalD * 100));
+        }
+        else
+        {
+            statsUi.SetActive(false);
+        }
+
+    }
+
+    private void Recruit()
+    {
+        recruitmentIndex++;
+        Gold -= StatTable.Price[curMercenary.mercenary.mercenaryRank];
+    }
+
+    private IEnumerator ShowPowerCo(TextMeshProUGUI text, float value)
+    {
+        float time = 0f;
+        float interval = 0.02f;
+
+        while(time < 2)
+        {
+            float rand = Random.Range(0, value * 2);
+            if (value == curMercenary.criticalP * 100 || value == curMercenary.criticalD * 100)
+            {
+                text.text = rand.ToString("N0") + "%";
+            }
+            else
+            {
+                text.text = rand.ToString("N0");
+            }
+
+            time += interval;
+            interval = Mathf.Lerp(0.02f, 0.15f, time / 2);
+            yield return new WaitForSeconds(interval);
+        }
+
+        if(value == curMercenary.criticalP * 100 ||  value == curMercenary.criticalD * 100)
+        {
+            text.text = value.ToString("N0") + "%";
+        }
+        else
+        {
+            text.text = value.ToString("N0");
+        }
     }
 }

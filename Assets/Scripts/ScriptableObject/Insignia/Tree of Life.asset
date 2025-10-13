@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 647d74a4507cb7e43820b024672cfdb6, type: 3}
   m_Name: Tree of Life
   m_EditorClassIdentifier: Assembly-CSharp::Insignia
-  insigniaName: 
-  insigniaImage: {fileID: 0}
-  insigniaRank: 0
-  atk: 0
-  def: 0
-  hp: 0
+  insigniaName: Tree of Life
+  insigniaImage: {fileID: 21300000, guid: 4356cf56d96faa44b8d10b381a315b2e, type: 3}
+  insigniaRank: 1
+  atk: 1
+  def: 1
+  hp: 1
   criticalPercent: 0
   criticalDamage: 0

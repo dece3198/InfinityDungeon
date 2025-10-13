@@ -12,5 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 647d74a4507cb7e43820b024672cfdb6, type: 3}
   m_Name: BowMaster
   m_EditorClassIdentifier: Assembly-CSharp::Insignia
+  insigniaName: BowMaster
   insigniaImage: {fileID: 21300000, guid: 3ca38cc73207c144ab010a4796fbf81f, type: 3}
   insigniaRank: 6
+  atk: 0
+  def: 0
+  hp: 0
+  criticalPercent: 0
+  criticalDamage: 0

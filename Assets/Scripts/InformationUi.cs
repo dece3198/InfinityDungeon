@@ -59,4 +59,10 @@ public class InformationUi : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
     }
+
+    public void Xbutton()
+    {
+        isUi = false;
+        uiObj.SetActive(false);
+    }
 }

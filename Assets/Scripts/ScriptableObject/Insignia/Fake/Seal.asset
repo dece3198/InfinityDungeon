@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 647d74a4507cb7e43820b024672cfdb6, type: 3}
   m_Name: Seal
   m_EditorClassIdentifier: Assembly-CSharp::Insignia
-  insigniaName: 
-  insigniaImage: {fileID: 0}
+  insigniaName: Seal
+  insigniaImage: {fileID: 21300000, guid: 7261fa24a428fc640b82d4a7341b75f5, type: 3}
   insigniaRank: 0
   atk: 0
   def: 0
