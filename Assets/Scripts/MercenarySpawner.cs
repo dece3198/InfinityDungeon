@@ -21,7 +21,6 @@ public class MercenarySpawner : Singleton<MercenarySpawner>
 
     public void NextMercenary()
     {
-        
         if(isNext && LobbyManager.instance.isRecruit)
         {
             if (curMercenary == null)

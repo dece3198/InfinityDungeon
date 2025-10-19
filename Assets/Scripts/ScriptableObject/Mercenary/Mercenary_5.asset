@@ -35,3 +35,4 @@ MonoBehaviour:
   isCoatingImageFake: 0
   isInsigniaFake: 0
   insignia: {fileID: 11400000, guid: ea0f3edf10a6f2949923f525429fbc06, type: 2}
+  unitPrefab: {fileID: 3211306061399845015, guid: a1df723ddd9a9844a84a289308dbcdcd, type: 3}

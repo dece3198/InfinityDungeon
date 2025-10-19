@@ -13,6 +13,8 @@ public class UnitSlot : MonoBehaviour
 
         if (MouseController.instance.curSlot == this) return;
 
+        if (!unit.isSelect) return;
+
         if(!check.activeInHierarchy)
             check.SetActive(true);
 
@@ -33,6 +35,13 @@ public class UnitSlot : MonoBehaviour
                 check.SetActive(false);
             }
         }
+    }
+
+    public void AddUnit(UnitController unit)
+    {
+        unit.transform.position = transform.position;
+        unit.gameObject.SetActive(true);
+        controller = unit;
     }
 
     public void ClearSlot()

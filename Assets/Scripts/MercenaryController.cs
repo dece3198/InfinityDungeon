@@ -148,7 +148,7 @@ public class MercenarySit : BaseState<MercenaryController>
         MercenarySpawner.instance.next.SetActive(true);
         state.animator.SetBool("Move", false);
         state.animator.SetTrigger("Sit");
-
+        LobbyManager.instance.recruitmentButton.SetActive(true);
         Vector3 dir = (LobbyManager.instance.roads[state.posIndex].forward).normalized;
         dir.y = 0;
         Quaternion targetRot = Quaternion.LookRotation(dir);

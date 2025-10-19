@@ -64,18 +64,16 @@ public class UnitWalk : BaseState<UnitController>
                 Quaternion targetRot = Quaternion.LookRotation(dir);
                 state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 0.2f);
             }
-            float dist = (target.position - state.transform.position).sqrMagnitude;
-
-            if (dist <= 9)
-            {
-                state.ChangeState(UnitState.Attack);
-            }
         }
     }
 
     public override void Update(UnitController state)
     {
-
+        state.viewDetector.FindAttackTarget();
+        if(state.viewDetector.AttackTarget != null)
+        {
+            state.ChangeState(UnitState.Attack);
+        }
     }
 }
 
@@ -169,8 +167,14 @@ public class UnitController : MonoBehaviour
         }
     }
     public float maxHp;
+    public float atk;
+    public float atkSpeed;
+    public float def;
+    public float critRate;
+    public float critDmg;
+    public float skillDmg;
     public float speed;
-
+    public Mercenary mercenary;
     public Animator animator;
     public Rigidbody rigid;
     public ViewDetector viewDetector;
@@ -180,7 +184,9 @@ public class UnitController : MonoBehaviour
 
     public Vector3 orignPos;
 
+    public bool isMan;
     public bool isWait = true;
+    public bool isSelect = false;
 
     private void Awake()
     {
@@ -198,9 +204,23 @@ public class UnitController : MonoBehaviour
         ChangeState(UnitState.Idle);
     }
 
+    private void OnEnable()
+    {
+        atk = mercenary.atk;
+        atkSpeed = mercenary.atkSpeed;
+        def = mercenary.def;
+        Hp = mercenary.hp;
+        maxHp = Hp;
+        critRate = mercenary.criticalPercent;
+        critDmg = mercenary.criticalDamage;
+        skillDmg = mercenary.skillDamage;
+        speed = mercenary.speed;
+    }
+
     public void OnSelect()
     {
         //잡을때 효과
+        isSelect = true;
         orignPos = transform.position;
     }
       
@@ -230,6 +250,7 @@ public class UnitController : MonoBehaviour
         {
             transform.position = orignPos;
         }
+        isSelect = false;
     }
 
     public void Update()

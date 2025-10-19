@@ -43,6 +43,8 @@ public class Mercenary : ScriptableObject
 
     public Insignia insignia;
 
+    public GameObject unitPrefab;
+
     public void CalculateStats()
     {
         rankValu = 0;
@@ -90,6 +92,9 @@ public class Mercenary : ScriptableObject
                 break;
             case MercenaryClass.Tanker:
                 atk = 10; atkSpeed = 2f; def = 10; speed = 1; hp = 500; skillDamage = 2f; criticalPercent = 0.75f; criticalDamage = 3f;
+                break;
+            case MercenaryClass.Healer:
+                atk = 20; atkSpeed = 2f; def = 5; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.1f; criticalDamage = 2f;
                 break;
             case MercenaryClass.AreaWizard:
                 atk = 10; atkSpeed = 1f; def = 10; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.1f; criticalDamage = 2f;
@@ -151,6 +156,7 @@ public class Mercenary : ScriptableObject
             case MercenaryClass.Warrior: return (7f, 0.5f, 10f, 100f, 1f, 0.35f, 2f, 2f);
             case MercenaryClass.Thrower: return (3f, 0.5f, 10f, 50f, 1f, 0.75f, 3f, 2f);
             case MercenaryClass.Tanker: return (10f, 2f, 10f, 500f, 1f, 0.75f, 3f, 2f);
+            case MercenaryClass.Healer: return (20f, 2f, 5f, 50f, 1f, 0.1f, 2f, 2f);
             case MercenaryClass.AreaWizard: return (10f, 1f, 10f, 50f, 1f, 0.1f, 2f, 2f);
             default: return (0, 0, 0, 0, 0, 0, 0, 0);
         }

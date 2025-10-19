@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class StatTable
 {
@@ -74,7 +75,7 @@ public class LobbyManager : Singleton<LobbyManager>
             recruiText.text = recruitmentIndex.ToString() + " / 5";
             if(recruitmentIndex == 5)
             {
-                //게임 시작 버튼 활성화
+                StartCoroutine(RecruitAllMercenariesCo());
             }
         }
     }
@@ -96,9 +97,13 @@ public class LobbyManager : Singleton<LobbyManager>
     [SerializeField] private GameObject dictionaryUi;
     [SerializeField] private GameObject checkUi;
     [SerializeField] private TextMeshProUGUI checkText;
+    public GameObject recruitmentButton;
 
     [SerializeField] private Transform[] randerPos;
     [SerializeField] private MercenarySlot[] randerUi;
+
+    [SerializeField] private GameObject[] buttons;
+    [SerializeField] private GameObject dungeonButton;
 
     private int randerIndex = 0;
     private int checkIndex;
@@ -118,7 +123,7 @@ public class LobbyManager : Singleton<LobbyManager>
         {
             randerUi[i].gameObject.SetActive(false);
         }
-        StartCoroutine(FadeOut());
+        fadeInOut.DOSizeDelta(orignPos, 1f);
     }
 
     //종이 세팅
@@ -158,6 +163,8 @@ public class LobbyManager : Singleton<LobbyManager>
     //버튼 눌렀을때 중요한 버튼 재확인 버튼
     public void CheckUi(int index)
     {
+        if (index == 0 && !recruitmentButton.activeInHierarchy) return;
+
         isCheck = !isCheck;
 
         if(isCheck)
@@ -195,15 +202,22 @@ public class LobbyManager : Singleton<LobbyManager>
     //용병 영입
     private void Recruit()
     {
-        if(RecruitmentIndex < 5)
+        if(Gold >= StatTable.Price[curMercenary.mercenary.mercenaryRank])
         {
-            if (isRecruit && curMercenary != null)
+            if (RecruitmentIndex < 5)
             {
-                if (curMercenary.mercenaryState == MercenaryState.Sit)
+                if (isRecruit && curMercenary != null)
                 {
-                    StartCoroutine(RecruitCo());
+                    if (curMercenary.mercenaryState == MercenaryState.Sit)
+                    {
+                        StartCoroutine(RecruitCo());
+                    }
                 }
             }
+        }
+        else
+        {
+            MercenarySpawner.instance.NextMercenary();
         }
     }
 
@@ -217,12 +231,9 @@ public class LobbyManager : Singleton<LobbyManager>
         randerIndex++;
     }
 
-    //FadeOut
-    private IEnumerator FadeOut()
+    public void DungeonButton()
     {
-        fadeInOut.gameObject.SetActive(true);
-        fadeInOut.DOSizeDelta(orignPos, 1f);
-        yield return new WaitForSeconds(1f);
+        StartCoroutine(FadeIn());
     }
 
     //용병 영입 코루틴
@@ -231,6 +242,7 @@ public class LobbyManager : Singleton<LobbyManager>
         isRecruit = false;
         RecruitmentIndex++;
         uiManager.paper.SetActive(false);
+        recruitmentButton.SetActive(false);
         MercenarySpawner.instance.curMercenary = null;
         Gold -= StatTable.Price[curMercenary.mercenary.mercenaryRank];
         curMercenary.posIndex = 8;
@@ -241,4 +253,30 @@ public class LobbyManager : Singleton<LobbyManager>
         isRecruit = true;
     }
 
+    //FadeOut
+    private IEnumerator FadeOut()
+    {
+        fadeInOut.gameObject.SetActive(true);
+        fadeInOut.DOSizeDelta(orignPos, 1f);
+        yield return new WaitForSeconds(1f);
+    }
+
+    private IEnumerator FadeIn()
+    {
+        fadeInOut.DOSizeDelta(Vector2.zero, 1f);
+        yield return new WaitForSeconds(1.5f);
+        AsyncOperation op = SceneManager.LoadSceneAsync("DungeonScene");
+    }
+
+    private IEnumerator RecruitAllMercenariesCo()
+    {
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            buttons[i].SetActive(false);
+        }
+        subCam.SetActive(false);
+        yield return new WaitForSeconds(5f);
+        dungeonButton.SetActive(true);
+        uiManager.MercenaryUiButton();
+    }
 }
