@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 450cba1792c59a44c9bc8b8fbbc3f0fc, type: 3}
   m_Name: Mercenary_0
   m_EditorClassIdentifier: Assembly-CSharp::Mercenary
-  mercenaryName: Arthur Kim
-  mercenaryImage: {fileID: 21300000, guid: c83f00eab860b84408c1c44ba6ee0b23, type: 3}
+  mercenaryName: Matilda Bae
+  mercenaryImage: {fileID: 21300000, guid: b28c5259bdd712049a3eac270757da36, type: 3}
   mercenaryClass: 0
   ageRank: 3
   heightRank: 6
@@ -24,6 +24,7 @@ MonoBehaviour:
   mercenaryRank: 5
   rankValu: 25
   atk: 47
+  atkSpeed: 0
   def: 16
   speed: 4
   hp: 231

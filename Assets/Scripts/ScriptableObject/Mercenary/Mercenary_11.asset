@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 450cba1792c59a44c9bc8b8fbbc3f0fc, type: 3}
+  m_Name: Mercenary_11
+  m_EditorClassIdentifier: Assembly-CSharp::Mercenary
+  mercenaryName: Oswald Kim
+  mercenaryImage: {fileID: 21300000, guid: 2b5f7b4360cd50c489a1b99dae7f5f12, type: 3}
+  mercenaryClass: 11
+  ageRank: 0
+  heightRank: 5
+  weightRank: 5
+  weaponRank: 0
+  armorRank: 6
+  potentialityRank: 2
+  mercenaryRank: 3
+  rankValu: 18
+  atk: 29
+  atkSpeed: 0
+  def: 1
+  speed: 3
+  hp: 735
+  criticalPercent: 0.5
+  criticalDamage: 2
+  skillDamage: 2
+  isCharacterImageFake: 1
+  isCoatingImageFake: 0
+  isInsigniaFake: 0
+  insignia: {fileID: 11400000, guid: 66bad177dae8e27418fd32a275f121cb, type: 2}

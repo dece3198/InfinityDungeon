@@ -12,25 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 450cba1792c59a44c9bc8b8fbbc3f0fc, type: 3}
   m_Name: Mercenary_2
   m_EditorClassIdentifier: Assembly-CSharp::Mercenary
-  mercenaryName: 'Faelar Choe '
-  mercenaryImage: {fileID: 21300000, guid: c87caf845d791be43a79e60989cd8ad5, type: 3}
+  mercenaryName: Joan Lee
+  mercenaryImage: {fileID: 21300000, guid: b2dc3ffbd0ef5004298cc2e4a1a2f632, type: 3}
   mercenaryClass: 2
-  ageRank: 0
-  heightRank: 0
-  weightRank: 3
-  weaponRank: 3
-  armorRank: 3
+  ageRank: 4
+  heightRank: 3
+  weightRank: 2
+  weaponRank: 2
+  armorRank: 2
   potentialityRank: 4
-  mercenaryRank: 2
-  rankValu: 13
-  atk: 10
-  def: 12
-  speed: 4
-  hp: 73
+  mercenaryRank: 3
+  rankValu: 17
+  atk: 17.388
+  atkSpeed: 1.5
+  def: 16.560001
+  speed: 5.4
+  hp: 129.6
   criticalPercent: 0.5
   criticalDamage: 3
   skillDamage: 1.5
-  isCharacterImageFake: 1
+  isCharacterImageFake: 0
   isCoatingImageFake: 0
   isInsigniaFake: 0
   insignia: {fileID: 11400000, guid: ccc7eab3d02ed5740a65e646ad7f77b2, type: 2}

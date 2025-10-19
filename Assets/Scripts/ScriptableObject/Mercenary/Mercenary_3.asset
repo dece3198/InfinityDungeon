@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 450cba1792c59a44c9bc8b8fbbc3f0fc, type: 3}
   m_Name: Mercenary_3
   m_EditorClassIdentifier: Assembly-CSharp::Mercenary
-  mercenaryName: Alatar Han
-  mercenaryImage: {fileID: 21300000, guid: 02be79814035ac445acee6b31ab301aa, type: 3}
-  mercenaryClass: 3
+  mercenaryName: Agnes Ahn
+  mercenaryImage: {fileID: 21300000, guid: 855644d6a9f4fe442834fdb5c330f127, type: 3}
+  mercenaryClass: 12
   ageRank: 4
   heightRank: 1
   weightRank: 6
@@ -24,6 +24,7 @@ MonoBehaviour:
   mercenaryRank: 3
   rankValu: 17
   atk: 5
+  atkSpeed: 0
   def: 6
   speed: 3
   hp: 50

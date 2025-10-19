@@ -17,11 +17,15 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartButton()
     {
-        StartCoroutine(StartCo());
+        if(GameManager.instance.isStart)
+        {
+            StartCoroutine(StartCo());
+        }
     }
 
     private IEnumerator StartCo()
     {
+        GameManager.instance.isStart = false;
         StartAni[0].SetTrigger("Open");
         StartAni[1].SetTrigger("Open");
         yield return new WaitForSeconds(2f);
@@ -39,5 +43,6 @@ public class MainMenuManager : MonoBehaviour
             yield return null;
         }
         op.allowSceneActivation = true;
+        GameManager.instance.isStart = true;
     }
 }

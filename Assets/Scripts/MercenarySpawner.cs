@@ -22,7 +22,7 @@ public class MercenarySpawner : Singleton<MercenarySpawner>
     public void NextMercenary()
     {
         
-        if(isNext)
+        if(isNext && LobbyManager.instance.isRecruit)
         {
             if (curMercenary == null)
             {
@@ -61,7 +61,7 @@ public class MercenarySpawner : Singleton<MercenarySpawner>
     private IEnumerator NextCo(MercenaryController mercenaryController)
     {
         isNext = false;
-        LobbyManager.instance.paper.SetActive(false);
+        LobbyManager.instance.uiManager.paper.SetActive(false);
         mercenaryController.animator.SetTrigger("Up");
         yield return new WaitForSeconds(2f);
         mercenaryController.posIndex++;

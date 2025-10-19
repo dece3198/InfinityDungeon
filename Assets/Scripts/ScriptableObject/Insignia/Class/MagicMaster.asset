@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 647d74a4507cb7e43820b024672cfdb6, type: 3}
   m_Name: MagicMaster
   m_EditorClassIdentifier: Assembly-CSharp::Insignia
-  insigniaName: 
+  insigniaName: MagicMaster
   insigniaImage: {fileID: 21300000, guid: b3412c1534faa0a4b8e9a587add7953f, type: 3}
   insigniaRank: 6
   atk: 5

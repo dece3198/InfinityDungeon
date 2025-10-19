@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public static class StatTable
 {
@@ -13,19 +12,31 @@ public static class StatTable
         { Rank.C, 35 }, { Rank.D, 40 }, { Rank.E, 45 }, { Rank.F, 50 }
     };
 
-    public static readonly Dictionary<Rank, int> Height = new()
+    public static readonly Dictionary<Rank, int> ManHeight = new()
     {
         { Rank.S, 190 }, { Rank.A, 185 }, { Rank.B, 180 },
         { Rank.C, 175 }, { Rank.D, 170 }, { Rank.E, 165 }, { Rank.F, 160 }
     };
 
-    public static readonly Dictionary<Rank, int> WeightOffset = new()
+    public static readonly Dictionary<Rank, int> WomanHeight = new()
+    {
+        { Rank.S, 175 }, { Rank.A, 170 }, { Rank.B, 165 },
+        { Rank.C, 160 }, { Rank.D, 155 }, { Rank.E, 150 }, { Rank.F, 145 }
+    };
+
+    public static readonly Dictionary<Rank, int> ManWeightOffset = new()
     {
         { Rank.S, 0 }, { Rank.A, 8 }, { Rank.B, 16 },
         { Rank.C, 24 }, { Rank.D, 32 }, { Rank.E, 40 }, { Rank.F, 48 }
     };
 
-    public static readonly Dictionary<Rank, int> insignia = new()
+    public static readonly Dictionary<Rank, int> WomanWeightOffset = new()
+    {
+        { Rank.S, 0 }, { Rank.A, 5 }, { Rank.B, 10 },
+        { Rank.C, 15 }, { Rank.D, 20 }, { Rank.E, 25 }, { Rank.F, 30 }
+    };
+
+    public static readonly Dictionary<Rank, int> Insignia = new()
     {
         { Rank.S, 4 }, { Rank.A, 3 }, { Rank.B, 2 },
         { Rank.C, 1 }, { Rank.D, 0 }, { Rank.E, 0 }, { Rank.F, 0 }
@@ -41,6 +52,8 @@ public static class StatTable
 
 public class LobbyManager : Singleton<LobbyManager>
 {
+    //=== 데이터 및 상태 관리 변수 ===
+    public MercenaryController curMercenary;
     [SerializeField] private int gold;
     public int Gold
     {
@@ -51,200 +64,73 @@ public class LobbyManager : Singleton<LobbyManager>
             goldText.text = gold.ToString();
         }
     }
-
+    [SerializeField] private int recruitmentIndex;
+    public int RecruitmentIndex
+    {
+        get { return recruitmentIndex; }
+        set 
+        { 
+            recruitmentIndex = value;
+            recruiText.text = recruitmentIndex.ToString() + " / 5";
+            if(recruitmentIndex == 5)
+            {
+                //게임 시작 버튼 활성화
+            }
+        }
+    }
+    // === Ui 참조 === 
+    [Header("Game Display")]
     [SerializeField] private TextMeshProUGUI goldText;
-
-    [SerializeField] private GameObject subCam;
-    [SerializeField] private GameObject dictionaryUi;
-    [SerializeField] private GameObject statsUi;
+    [SerializeField] private TextMeshProUGUI recruiText;
     [SerializeField] private RectTransform fadeInOut;
-    [SerializeField] private GameObject checkUi;
-    [SerializeField] private TextMeshProUGUI checkText;
-    [SerializeField] private TextMeshProUGUI priceText;
-    private int checkIndex;
-    private int recruitmentIndex;
+
+    [Header("Game State")]
     public Transform[] roads;
     public Transform sitPos;
     public Transform paperPos;
+    public bool isRecruit = true;
+
+    public LobbyUiManager uiManager;
+
+    [SerializeField] private GameObject subCam;
+    [SerializeField] private GameObject dictionaryUi;
+    [SerializeField] private GameObject checkUi;
+    [SerializeField] private TextMeshProUGUI checkText;
+
+    [SerializeField] private Transform[] randerPos;
+    [SerializeField] private MercenarySlot[] randerUi;
+
+    private int randerIndex = 0;
+    private int checkIndex;
     private Vector2 orignPos;
     private bool isCheck = false;
     private bool isDictionary = false;
-    private bool isStats = false;
     private bool isConversion = false;
-    public MercenaryController curMercenary;
-
-    [SerializeField] private Insignia[] insignias;
-    [SerializeField] private Insignia[] fakeInsignias;
-
-    [SerializeField] private Sprite[] charactorImage;
-    [SerializeField] private Sprite[] fakeCoatingImages;
-    [SerializeField] private Sprite realCoatingImage;
-
-    [SerializeField] private InsigniaSlot[] slots;
-
-    public GameObject paper;
-    [SerializeField] private Image mercenaryImage;
-    [SerializeField] private Image coatingImage;
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private TextMeshProUGUI nameTextUi;
-    [SerializeField] private TextMeshProUGUI classText;
-    [SerializeField] private TextMeshProUGUI classTextUi;
-    [SerializeField] private TextMeshProUGUI ageText;
-    [SerializeField] private TextMeshProUGUI ageTextUi;
-    [SerializeField] private TextMeshProUGUI rankText;
-    [SerializeField] private TextMeshProUGUI rankTextUi;
-    [SerializeField] private TextMeshProUGUI heightText;
-    [SerializeField] private TextMeshProUGUI weightText;
-    [SerializeField] private TextMeshProUGUI weaponRankText;
-    [SerializeField] private TextMeshProUGUI armorRankText;
-
-    [SerializeField] private TextMeshProUGUI[] statsTexts;
 
     private void Start()
     {
         Gold += 500;
+        RecruitmentIndex = 0;
         orignPos = new Vector2(5000, 5000);
         fadeInOut.sizeDelta = Vector2.zero;
+
+        for(int i = 0; i < randerUi.Length; i++)
+        {
+            randerUi[i].gameObject.SetActive(false);
+        }
         StartCoroutine(FadeOut());
     }
 
-    private IEnumerator FadeOut()
-    {
-        fadeInOut.gameObject.SetActive(true);
-        fadeInOut.DOSizeDelta(orignPos, 1f);
-        yield return new WaitForSeconds(1f);
-    }
-
+    //종이 세팅
     public void PaperSetting()
     {
-
-        for(int i = 0; i < slots.Length; i++)
+        if(curMercenary != null)
         {
-            slots[i].ClearSlot();
-        }
-        Mercenary mercenary = curMercenary.mercenary;
-        int rand = Random.Range(0, 3);
-        int ageValue = StatTable.Age[mercenary.ageRank];
-        int heightValue = StatTable.Height[mercenary.heightRank];
-        float weightValue = ((heightValue - 100) * 0.9f) + StatTable.WeightOffset[mercenary.weightRank];
-
-        string name = $"Name : {mercenary.mercenaryName}";
-        string mercenaryClass = $"Class : {mercenary.mercenaryClass.ToString()}";
-        string age = $"Age : {ageValue}";
-        string rank = $"{mercenary.mercenaryRank.ToString()}";
-
-
-        nameText.text = name;
-        nameTextUi.text = name;
-        classText.text = mercenaryClass;
-        classTextUi.text = mercenaryClass;
-        ageText.text = age;
-        ageTextUi.text = age;
-        rankText.text = rank;
-        rankTextUi.text = rank;
-        heightText.text = $"Height : {heightValue}cm";
-        weightText.text = $"Weight : {weightValue}kg";
-        weaponRankText.text = $"{mercenary.weaponRank.ToString()}";
-        armorRankText.text = $"{mercenary.armorRank.ToString()}";
-        priceText.text = $"Price : {StatTable.Price[mercenary.mercenaryRank]}Gold";
-
-        if (mercenary.isCharacterImageFake)
-        {
-            mercenaryImage.sprite = GetRandomFakeImage(mercenary, charactorImage);
-        }
-        else
-        {
-            mercenaryImage.sprite = mercenary.mercenaryImage;
-        }
-
-        if (mercenary.isCoatingImageFake)
-        {
-            coatingImage.sprite = GetRandomFakeImage(mercenary, fakeCoatingImages);
-        }
-        else
-        {
-            coatingImage.sprite = realCoatingImage;
-        }
-
-        if (mercenary.mercenaryRank >= Rank.A)
-        {
-            AddSlot(mercenary.insignia);
-        }
-
-        if (mercenary.isInsigniaFake)
-        {
-            int randCount = Random.Range(1, 4);
-
-            List<Insignia> pool = new List<Insignia>(fakeInsignias);
-
-
-            for (int i = 0; i < randCount && pool.Count > 0; i++)
-            {
-                int randomIndex = Random.Range(0, pool.Count);
-                AddSlot(pool[randomIndex]);
-                pool.RemoveAt(randomIndex);
-            }
-        }
-        else
-        {
-            if (mercenary.mercenaryRank >= Rank.C)
-            {
-                int maxCount = StatTable.insignia[mercenary.mercenaryRank];
-                int randCount = Random.Range(1, maxCount);
-                AddRandomInsignia(mercenary, insignias, randCount);
-            }
-        }
-
-        mercenary.RoundStats();
-    }
-
-    private void AddRandomInsignia(Mercenary mercenary, Insignia[] pool, int count)
-    {
-        List<Insignia> candidates = new List<Insignia>(pool);
-
-        for (int i = 0; i < count && candidates.Count > 0; i++)
-        {
-            int randomIndex = Random.Range(0, candidates.Count);
-            Insignia chosen = candidates[randomIndex];
-
-            if (chosen.insigniaRank > mercenary.mercenaryRank)
-            {
-                if (Random.value > 0.05f)
-                {
-                    candidates.RemoveAt(randomIndex);
-                    i--;
-                    continue;
-                }
-            }
-
-            mercenary.atk += chosen.atk;
-            mercenary.def += chosen.def;
-            mercenary.hp += chosen.hp;
-
-            AddSlot(chosen);
-            candidates.RemoveAt(randomIndex);
+            uiManager.PaperSetting(curMercenary);
         }
     }
 
-    private void AddSlot(Insignia insignia)
-    {
-        for (int i = 0; i < slots.Length; i++)
-        {
-            if (slots[i].insignia == null)
-            {
-                slots[i].AddSlot(insignia);
-                return;
-            }
-        }
-    }
-
-    private Sprite GetRandomFakeImage(Mercenary mercenary, Sprite[] sprites)
-    {
-        List<Sprite> candidates = new List<Sprite>(sprites);
-        candidates.Remove(mercenary.mercenaryImage);
-        return candidates[Random.Range(0, candidates.Count)];
-    }
-
+    //카메라 시점 전환 버튼
     public void ConversionButton()
     {
         isConversion = !isConversion;
@@ -252,6 +138,7 @@ public class LobbyManager : Singleton<LobbyManager>
         subCam.SetActive(isConversion);
     }
 
+    //휘장 종류Ui 키고 끄기
     public void DictionaryUiOpen()
     {
         isDictionary = !isDictionary;
@@ -268,6 +155,7 @@ public class LobbyManager : Singleton<LobbyManager>
         }
     }
 
+    //버튼 눌렀을때 중요한 버튼 재확인 버튼
     public void CheckUi(int index)
     {
         isCheck = !isCheck;
@@ -289,74 +177,68 @@ public class LobbyManager : Singleton<LobbyManager>
 
     }
 
+    //재확인 버튼 수락했을때 알맞는 Index로 작동하도록
     public void IndexButton()
     {
         isCheck = false;
         checkUi.SetActive(false);
-        switch (checkIndex)
+        if(curMercenary != null)
         {
-            case 0: Recruit(); break;
-            case 1: StatsCheck(); break;
+            switch (checkIndex)
+            {
+                case 0: Recruit(); break;
+                case 1: uiManager.StatsCheck(curMercenary.mercenary); break;
+            }
         }
     }
 
-    private void StatsCheck()
-    {
-        isStats = !isStats;
-
-        if (isStats)
-        {
-            Gold -= 3;
-            statsUi.SetActive(true);
-            StartCoroutine(ShowPowerCo(statsTexts[0], curMercenary.atk));
-            StartCoroutine(ShowPowerCo(statsTexts[1], curMercenary.def));
-            StartCoroutine(ShowPowerCo(statsTexts[2], curMercenary.Hp));
-            StartCoroutine(ShowPowerCo(statsTexts[3], curMercenary.mercenary.speed));
-            StartCoroutine(ShowPowerCo(statsTexts[4], curMercenary.criticalP * 100));
-            StartCoroutine(ShowPowerCo(statsTexts[5], curMercenary.criticalD * 100));
-        }
-        else
-        {
-            statsUi.SetActive(false);
-        }
-
-    }
-
+    //용병 영입
     private void Recruit()
     {
-        recruitmentIndex++;
-        Gold -= StatTable.Price[curMercenary.mercenary.mercenaryRank];
+        if(RecruitmentIndex < 5)
+        {
+            if (isRecruit && curMercenary != null)
+            {
+                if (curMercenary.mercenaryState == MercenaryState.Sit)
+                {
+                    StartCoroutine(RecruitCo());
+                }
+            }
+        }
     }
 
-    private IEnumerator ShowPowerCo(TextMeshProUGUI text, float value)
+    public void RanderTextureMercenary(MercenaryController mercenary)
     {
-        float time = 0f;
-        float interval = 0.02f;
-
-        while(time < 2)
-        {
-            float rand = Random.Range(0, value * 2);
-            if (value == curMercenary.criticalP * 100 || value == curMercenary.criticalD * 100)
-            {
-                text.text = rand.ToString("N0") + "%";
-            }
-            else
-            {
-                text.text = rand.ToString("N0");
-            }
-
-            time += interval;
-            interval = Mathf.Lerp(0.02f, 0.15f, time / 2);
-            yield return new WaitForSeconds(interval);
-        }
-
-        if(value == curMercenary.criticalP * 100 ||  value == curMercenary.criticalD * 100)
-        {
-            text.text = value.ToString("N0") + "%";
-        }
-        else
-        {
-            text.text = value.ToString("N0");
-        }
+        mercenary.ChangeState(MercenaryState.Idle);
+        mercenary.transform.localRotation = randerPos[randerIndex].rotation;
+        mercenary.transform.position = randerPos[randerIndex].position;
+        randerUi[randerIndex].gameObject.SetActive(true);
+        randerUi[randerIndex].AddMercenary(mercenary.mercenary);
+        randerIndex++;
     }
+
+    //FadeOut
+    private IEnumerator FadeOut()
+    {
+        fadeInOut.gameObject.SetActive(true);
+        fadeInOut.DOSizeDelta(orignPos, 1f);
+        yield return new WaitForSeconds(1f);
+    }
+
+    //용병 영입 코루틴
+    private IEnumerator RecruitCo()
+    {
+        isRecruit = false;
+        RecruitmentIndex++;
+        uiManager.paper.SetActive(false);
+        MercenarySpawner.instance.curMercenary = null;
+        Gold -= StatTable.Price[curMercenary.mercenary.mercenaryRank];
+        curMercenary.posIndex = 8;
+        curMercenary.animator.SetTrigger("Up");
+        yield return new WaitForSeconds(2f);
+        curMercenary.ChangeState(MercenaryState.Walk);
+        curMercenary = null;    
+        isRecruit = true;
+    }
+
 }

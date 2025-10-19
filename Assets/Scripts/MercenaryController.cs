@@ -6,7 +6,27 @@ using UnityEngine.UI;
 
 public enum MercenaryState
 {
-    Walk, Give, Sit
+    Idle,Walk, Give, Sit
+}
+
+public class MercenaryIdle : BaseState<MercenaryController>
+{
+    public override void Enter(MercenaryController state)
+    {
+        state.animator.SetBool("Move", false);
+    }
+
+    public override void Exit(MercenaryController state)
+    {
+    }
+
+    public override void FixedUpdate(MercenaryController state)
+    {
+    }
+
+    public override void Update(MercenaryController state)
+    {
+    }
 }
 
 public class MercenaryWalk : BaseState<MercenaryController>
@@ -53,6 +73,11 @@ public class MercenaryWalk : BaseState<MercenaryController>
                 state.posIndex = 0;
                 state.paper.SetActive(true);
                 MercenarySpawner.instance.EnterPool(state.gameObject);
+            }
+            else if(state.posIndex == 8)
+            {
+                GameManager.instance.mercenaryList.Add(state.mercenary);
+                LobbyManager.instance.RanderTextureMercenary(state);
             }
             else
             {
@@ -109,7 +134,7 @@ public class MercenaryGive : BaseState<MercenaryController>
         state.paper.transform.position = state.paperPos.position;
         state.paper.transform.rotation = state.paperPos.rotation;
         state.paper.SetActive(false);
-        LobbyManager.instance.paper.SetActive(true);
+        LobbyManager.instance.uiManager.paper.SetActive(true);
         yield return new WaitForSeconds(1f);
         state.posIndex++;
         state.ChangeState(MercenaryState.Walk);
@@ -160,22 +185,7 @@ public class MercenarySit : BaseState<MercenaryController>
 
 public class MercenaryController : MonoBehaviour
 {
-    [SerializeField] private float hp;
-    public float Hp
-    {
-        get { return hp; }
-        set { hp = value; }
-    }
-
-    public float maxHp;
-    public float atk;
-    public float def;
-    public float atkSpeed;
     public float speed;
-    public float criticalP;
-    public float criticalD;
-
-
     public Mercenary mercenary;
     public Animator animator;
     public Rigidbody rigid;
@@ -185,7 +195,7 @@ public class MercenaryController : MonoBehaviour
     public MercenaryState mercenaryState;
     private Vector3 orignPos;
     public Transform paperPos;
-
+    public bool isMan;
     public bool isMove;
     public bool isWait;
 
@@ -194,6 +204,7 @@ public class MercenaryController : MonoBehaviour
         animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody>();
         stateMachine.Reset(this);
+        stateMachine.AddState(MercenaryState.Idle, new MercenaryIdle());
         stateMachine.AddState(MercenaryState.Walk, new MercenaryWalk());
         stateMachine.AddState(MercenaryState.Give, new MercenaryGive());
         stateMachine.AddState(MercenaryState.Sit, new MercenarySit());
@@ -214,12 +225,14 @@ public class MercenaryController : MonoBehaviour
 
         ApplyFakeStatModifier();
 
-        atk = mercenary.atk;
-        def = mercenary.def;
-        Hp = mercenary.hp;
-        maxHp = Hp;
-        criticalP = mercenary.criticalPercent;
-        criticalD = mercenary.criticalDamage;
+        if (isMan)
+        {
+            animator.SetFloat("Blend", 0);
+        }
+        else
+        {
+            animator.SetFloat("Blend", 1);
+        }
     }
 
     public void FixedUpdate()
