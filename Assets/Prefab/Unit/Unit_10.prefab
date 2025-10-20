@@ -2433,6 +2433,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitController
   hp: 0
+  mp: 0
+  maxMp: 0
   maxHp: 0
   atk: 0
   atkSpeed: 0
@@ -2446,9 +2448,12 @@ MonoBehaviour:
   rigid: {fileID: 0}
   viewDetector: {fileID: 0}
   unitState: 0
+  hpBar: {fileID: 0}
+  mpBar: {fileID: 0}
+  canvas: {fileID: 0}
   orignPos: {x: 0, y: 0, z: 0}
   isMan: 1
-  isWait: 1
+  isWait: 0
   isSelect: 0
 --- !u!114 &5581076971141764818
 MonoBehaviour:

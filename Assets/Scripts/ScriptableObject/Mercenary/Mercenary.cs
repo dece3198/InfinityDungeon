@@ -58,46 +58,46 @@ public class Mercenary : ScriptableObject
         switch (mercenaryClass)
         {
             case MercenaryClass.SwordMan :
-                atk = 23f; atkSpeed = 1.5f; def = 15; speed = 1; hp = 100; skillDamage = 1.5f; criticalPercent = 0.25f; criticalDamage = 2f;
+                atk = 23f; atkSpeed = 1.5f; def = 15; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Shielder:
-                atk = 10f; atkSpeed = 2f; def = 25; speed = 1; hp = 200; skillDamage = 1.5f; criticalPercent = 0.25f; criticalDamage = 2f;
+                atk = 10f; atkSpeed = 2f; def = 25; speed = 1; hp = 200; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Archer:
-                atk = 7f; atkSpeed = 1.5f; def = 10; speed = 2; hp = 50; skillDamage = 1.5f; criticalPercent = 0.5f; criticalDamage = 3f;
+                atk = 10f; atkSpeed = 1.5f; def = 10; speed = 2; hp = 50; skillDamage = 10f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
             case MercenaryClass.FocusWizard:
-                atk = 5; atkSpeed = 2f; def = 10; speed = 1; hp = 50; skillDamage = 3f; criticalPercent = 0.1f; criticalDamage = 2f;
+                atk = 5; atkSpeed = 2f; def = 10; speed = 1; hp = 50; skillDamage = 30f; criticalPercent = 0.1f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Assassin:
-                atk = 5; atkSpeed = 0.5f; def = 20; speed = 2; hp = 50; skillDamage = 2f; criticalPercent = 0.75f; criticalDamage = 4f;
+                atk = 7; atkSpeed = 0.5f; def = 20; speed = 2; hp = 50; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 4f;
                 break;
             case MercenaryClass.Mauler:
-                atk = 25; atkSpeed = 3f;  def = 1; speed = 1; hp = 400; skillDamage = 2f; criticalPercent = 0.5f; criticalDamage = 2f;
+                atk = 25; atkSpeed = 3f;  def = 1; speed = 1; hp = 400; skillDamage = 5f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Lancer:
-                atk = 20; atkSpeed = 1.5f; def = 10; speed = 1; hp = 150; skillDamage = 2f; criticalPercent = 0.35f; criticalDamage = 2f;
+                atk = 20; atkSpeed = 1.5f; def = 5; speed = 1; hp = 150; skillDamage = 5f; criticalPercent = 0.35f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Berserker:
-                atk = 50; atkSpeed = 2f; def = 20; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.35f; criticalDamage = 2f;
+                atk = 50; atkSpeed = 2f; def = 20; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Hunter:
-                atk = 3; atkSpeed = 0.5f; def = 10; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.75f; criticalDamage = 3f;
+                atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 4f;
                 break;
             case MercenaryClass.Warrior:
-                atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 100; skillDamage = 2f; criticalPercent = 0.35f; criticalDamage = 2f;
+                atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.35f; criticalDamage = 4f;
                 break;
             case MercenaryClass.Thrower:
-                atk = 3; atkSpeed = 0.5f; def = 10; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.75f; criticalDamage = 3f;
+                atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 4f;
                 break;
             case MercenaryClass.Tanker:
-                atk = 10; atkSpeed = 2f; def = 10; speed = 1; hp = 500; skillDamage = 2f; criticalPercent = 0.75f; criticalDamage = 3f;
+                atk = 10; atkSpeed = 2f; def = 10; speed = 1; hp = 500; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Healer:
-                atk = 20; atkSpeed = 2f; def = 5; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.1f; criticalDamage = 2f;
+                atk = 20; atkSpeed = 2f; def = 5; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0f; criticalDamage = 0f;
                 break;
             case MercenaryClass.AreaWizard:
-                atk = 10; atkSpeed = 1f; def = 10; speed = 1; hp = 50; skillDamage = 2f; criticalPercent = 0.1f; criticalDamage = 2f;
+                atk = 10; atkSpeed = 1f; def = 10; speed = 1; hp = 50; skillDamage = 10f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
         }
 
@@ -144,20 +144,20 @@ public class Mercenary : ScriptableObject
     {
         switch (mercenaryClass)
         {
-            case MercenaryClass.SwordMan: return (23f, 1.5f, 15f, 100f, 1f, 0.25f, 2f, 1.5f);
-            case MercenaryClass.Shielder: return (10f, 2f, 25f, 200f, 1f, 0.25f, 2f, 1.5f);
-            case MercenaryClass.Archer: return (7f, 1.5f, 10f, 50f, 2f, 0.5f, 3f, 1.5f);
-            case MercenaryClass.FocusWizard: return (5f, 2f, 10f, 50f, 1f, 0.1f, 2f, 3f);
-            case MercenaryClass.Assassin: return (5f, 0.5f, 20f, 50f, 2f, 0.75f, 4f, 2f);
-            case MercenaryClass.Mauler: return (25f, 3f, 1f, 400f, 1f, 0.5f, 2f, 2f);
-            case MercenaryClass.Lancer: return (20f, 1.5f, 10f, 150f, 1f, 0.35f, 2f, 2f);
-            case MercenaryClass.Berserker: return (50f, 2f, 20f, 50f, 1f, 0.35f, 2f, 2f);
-            case MercenaryClass.Hunter: return (3f, 0.5f, 10f, 50f, 1f, 0.75f, 3f, 2f);
-            case MercenaryClass.Warrior: return (7f, 0.5f, 10f, 100f, 1f, 0.35f, 2f, 2f);
-            case MercenaryClass.Thrower: return (3f, 0.5f, 10f, 50f, 1f, 0.75f, 3f, 2f);
-            case MercenaryClass.Tanker: return (10f, 2f, 10f, 500f, 1f, 0.75f, 3f, 2f);
-            case MercenaryClass.Healer: return (20f, 2f, 5f, 50f, 1f, 0.1f, 2f, 2f);
-            case MercenaryClass.AreaWizard: return (10f, 1f, 10f, 50f, 1f, 0.1f, 2f, 2f);
+            case MercenaryClass.SwordMan: return (23f, 1.5f, 15f, 100f, 1f, 0.25f, 2f, 4f);
+            case MercenaryClass.Shielder: return (10f, 2f, 25f, 200f, 1f, 0.25f, 2f, 4f);
+            case MercenaryClass.Archer: return (10f, 1.5f, 10f, 50f, 2f, 0.5f, 2f, 10f);
+            case MercenaryClass.FocusWizard: return (5f, 2f, 10f, 50f, 1f, 0.1f, 2f, 30f);
+            case MercenaryClass.Assassin: return (7f, 0.5f, 20f, 50f, 2f, 0.75f, 4f, 4f);
+            case MercenaryClass.Mauler: return (25f, 3f, 1f, 400f, 1f, 0.5f, 2f, 5f);
+            case MercenaryClass.Lancer: return (20f, 1.5f, 5f, 150f, 1f, 0.35f, 2f, 5f);
+            case MercenaryClass.Berserker: return (50f, 2f, 20f, 50f, 1f, 0.25f, 2f, 4f);
+            case MercenaryClass.Hunter: return (7f, 0.5f, 10f, 50f, 1f, 0.75f, 4f, 4f);
+            case MercenaryClass.Warrior: return (7f, 0.5f, 10f, 100f, 1f, 0.35f, 4f, 4f);
+            case MercenaryClass.Thrower: return (7f, 0.5f, 10f, 50f, 1f, 0.75f, 4f, 4f);
+            case MercenaryClass.Tanker: return (10f, 2f, 10f, 500f, 1f, 0.75f, 2f, 4f);
+            case MercenaryClass.Healer: return (20f, 2f, 5f, 50f, 1f, 0f, 0f, 4f);
+            case MercenaryClass.AreaWizard: return (10f, 1f, 10f, 50f, 1f, 0.5f, 2f, 10f);
             default: return (0, 0, 0, 0, 0, 0, 0, 0);
         }
     }

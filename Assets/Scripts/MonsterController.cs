@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public class MonsterIdle : BaseState<MonsterController>
@@ -56,6 +58,7 @@ public class MonsterWalk : BaseState<MonsterController>
             state.rigid.linearVelocity = Vector3.zero;
             if (dir != Vector3.zero)
             {
+                state.canvas.eulerAngles = Vector3.zero;
                 Quaternion targetRot = Quaternion.LookRotation(dir);
                 state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 0.2f);
             }
@@ -152,26 +155,30 @@ public class MonsterDie : BaseState<MonsterController>
     }
 }
 
-public class MonsterController : Monster
+public class MonsterController : Monster, IInteraction
 {
     [SerializeField] private float hp;
-    public float HP 
+    public float Hp
     {
         get { return hp; }
         set 
         { 
-            hp = value; 
+            hp = value;
+            hpBar.value = Mathf.Clamp01(hp / maxHp);
         } 
     }
 
     public float maxHp;
     public float speed;
+    [SerializeField] SkinnedMeshRenderer[] renderers;
     [SerializeField] private TextManager textManager;
     [SerializeField] private Slider hpBar;
+    public Transform canvas;
     public MonsterState monsterState;
     public Animator animator;
     public Rigidbody rigid;
     public ViewDetector viewDetector;
+    public Transform center;
     private StateMachine<MonsterState, MonsterController> stateMachine = new StateMachine<MonsterState, MonsterController>();
 
     private void Awake()
@@ -180,6 +187,7 @@ public class MonsterController : Monster
         animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody>();
         viewDetector = GetComponent<ViewDetector>();
+        renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
         stateMachine.Reset(this);
         stateMachine.AddState(MonsterState.Idle, new MonsterIdle());
         stateMachine.AddState(MonsterState.Walk, new MonsterWalk());
@@ -192,7 +200,7 @@ public class MonsterController : Monster
 
     private void OnEnable()
     {
-        hp = maxHp;
+        Hp = maxHp;
         ChangeState(MonsterState.Idle);
     }
 
@@ -210,5 +218,25 @@ public class MonsterController : Monster
     {
         stateMachine.ChangeState(state);
         monsterState = state;
+    }
+
+    public void TakeHit(float damage, TextType textType)
+    {
+        Hp -= damage;
+        textManager.ShowDamageText(damage, textType);
+        StartCoroutine(HitCo());
+    }
+
+    private IEnumerator HitCo()
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            renderers[i].material.color = Color.red;
+        }
+        yield return new WaitForSeconds(0.1f);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            renderers[i].material.color = Color.white;
+        }
     }
 }

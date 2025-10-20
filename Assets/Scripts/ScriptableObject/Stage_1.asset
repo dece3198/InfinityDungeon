@@ -17,11 +17,3 @@ MonoBehaviour:
     index: 1
   - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
     index: 2
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
-    index: 3
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
-    index: 4
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
-    index: 5
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
-    index: 6
