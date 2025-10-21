@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public class MonsterIdle : BaseState<MonsterController>
@@ -22,7 +21,7 @@ public class MonsterIdle : BaseState<MonsterController>
     {
         if(StageManager.instance.isStage)
         {
-            state.viewDetector.FindTarget();
+            state.viewDetector.FindUnitTarget();
             if (state.viewDetector.Target != null)
             {
                 state.ChangeState(MonsterState.Walk);
@@ -62,18 +61,16 @@ public class MonsterWalk : BaseState<MonsterController>
                 Quaternion targetRot = Quaternion.LookRotation(dir);
                 state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 0.2f);
             }
-            float dist = (target.position - state.transform.position).sqrMagnitude;
-
-            if (dist <= 9)
-            {
-                state.ChangeState(MonsterState.Attack);
-            }
         }
     }
 
     public override void Update(MonsterController state)
     {
-
+        state.viewDetector.FindAttackTarget();
+        if(state.viewDetector.AttackTarget != null)
+        {
+            state.ChangeState(MonsterState.Attack);
+        }
     }
 }
 
@@ -101,7 +98,9 @@ public class MonsterAttack : BaseState<MonsterController>
     public override void Enter(MonsterController state)
     {
         state.animator.SetBool("Move", false);
+        state.animator.SetTrigger("Attack");
         state.rigid.linearVelocity = Vector3.zero;
+        state.StartCoroutine(AttackCo(state));
     }
 
     public override void Exit(MonsterController state)
@@ -114,6 +113,15 @@ public class MonsterAttack : BaseState<MonsterController>
 
     public override void Update(MonsterController state)
     {
+    }
+
+    private IEnumerator AttackCo(MonsterController state)
+    {
+        yield return new WaitForSeconds(state.atkSpeed);
+        if(state.monsterState == MonsterState.Attack)
+        {
+            state.ChangeState(MonsterState.Idle);
+        }
     }
 }
 
@@ -170,6 +178,8 @@ public class MonsterController : Monster, IInteraction
 
     public float maxHp;
     public float speed;
+    public float atk;
+    public float atkSpeed;
     [SerializeField] SkinnedMeshRenderer[] renderers;
     [SerializeField] private TextManager textManager;
     [SerializeField] private Slider hpBar;
@@ -218,6 +228,15 @@ public class MonsterController : Monster, IInteraction
     {
         stateMachine.ChangeState(state);
         monsterState = state;
+    }
+
+    public void Attack()
+    {
+        viewDetector.FindAttackTarget();
+        if (viewDetector.AttackTarget != null)
+        {
+            viewDetector.AttackTarget.GetComponent<UnitController>().TakeHit(atk);
+        }
     }
 
     public void TakeHit(float damage, TextType textType)

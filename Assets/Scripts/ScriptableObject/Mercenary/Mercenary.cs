@@ -61,10 +61,10 @@ public class Mercenary : ScriptableObject
                 atk = 23f; atkSpeed = 1.5f; def = 15; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Shielder:
-                atk = 10f; atkSpeed = 2f; def = 25; speed = 1; hp = 200; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
+                atk = 10f; atkSpeed = 2f; def = 25; speed = 1; hp = 200; skillDamage = 20f; criticalPercent = 0.25f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Archer:
-                atk = 10f; atkSpeed = 1.5f; def = 10; speed = 2; hp = 50; skillDamage = 10f; criticalPercent = 0.5f; criticalDamage = 2f;
+                atk = 10f; atkSpeed = 1.5f; def = 10; speed = 2; hp = 50; skillDamage = 5f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
             case MercenaryClass.FocusWizard:
                 atk = 5; atkSpeed = 2f; def = 10; speed = 1; hp = 50; skillDamage = 30f; criticalPercent = 0.1f; criticalDamage = 2f;
@@ -145,8 +145,8 @@ public class Mercenary : ScriptableObject
         switch (mercenaryClass)
         {
             case MercenaryClass.SwordMan: return (23f, 1.5f, 15f, 100f, 1f, 0.25f, 2f, 4f);
-            case MercenaryClass.Shielder: return (10f, 2f, 25f, 200f, 1f, 0.25f, 2f, 4f);
-            case MercenaryClass.Archer: return (10f, 1.5f, 10f, 50f, 2f, 0.5f, 2f, 10f);
+            case MercenaryClass.Shielder: return (10f, 2f, 25f, 200f, 1f, 0.25f, 2f, 20f);
+            case MercenaryClass.Archer: return (10f, 1.5f, 10f, 50f, 2f, 0.5f, 2f, 5f);
             case MercenaryClass.FocusWizard: return (5f, 2f, 10f, 50f, 1f, 0.1f, 2f, 30f);
             case MercenaryClass.Assassin: return (7f, 0.5f, 20f, 50f, 2f, 0.75f, 4f, 4f);
             case MercenaryClass.Mauler: return (25f, 3f, 1f, 400f, 1f, 0.5f, 2f, 5f);

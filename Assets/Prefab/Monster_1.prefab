@@ -756,9 +756,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5c6dd45cde4de34c84a8fa1cb182fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterController
-  hp: 100
+  hp: 1000
   maxHp: 0
   speed: 5
+  atk: 10
+  atkSpeed: 2
   renderers:
   - {fileID: 4903433398237942609}
   - {fileID: 1122003918462691387}
@@ -798,6 +800,9 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 128
+  sheldMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!137 &7933643430766195415 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 796407376638139366, guid: 127ed3181ae94f142babbacd9695d05e, type: 3}

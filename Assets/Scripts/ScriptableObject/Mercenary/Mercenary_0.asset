@@ -24,7 +24,7 @@ MonoBehaviour:
   mercenaryRank: 5
   rankValu: 25
   atk: 47
-  atkSpeed: 0
+  atkSpeed: 2
   def: 16
   speed: 4
   hp: 231

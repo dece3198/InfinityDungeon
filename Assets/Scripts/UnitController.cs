@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,7 +30,15 @@ public class UnitIdle : BaseState<UnitController>
     {
         if (StageManager.instance.isStage && state.isWait)
         {
-            state.viewDetector.FindTarget();
+            if(state.mercenary.mercenaryClass == MercenaryClass.Healer)
+            {
+                state.viewDetector.FindHealTarget();
+            }
+            else
+            {
+                state.viewDetector.FindTarget();
+            }
+
             if (state.viewDetector.Target != null)
             {
                 state.ChangeState(UnitState.Walk);
@@ -65,7 +74,7 @@ public class UnitWalk : BaseState<UnitController>
             state.rigid.linearVelocity = Vector3.zero;
             if (dir != Vector3.zero)
             {
-                state.canvas.eulerAngles = Vector3.zero;
+                state.textManager.transform.eulerAngles = Vector3.zero;
                 Quaternion targetRot = Quaternion.LookRotation(dir);
                 state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 0.2f);
             }
@@ -75,7 +84,7 @@ public class UnitWalk : BaseState<UnitController>
     public override void Update(UnitController state)
     {
         state.viewDetector.FindAttackTarget();
-        if(state.viewDetector.AttackTarget != null)
+        if(state.viewDetector.AttackTarget != null && state.viewDetector.AttackTarget != state.gameObject)
         {
             state.ChangeState(UnitState.Attack);
         }
@@ -108,10 +117,13 @@ public class UnitAttack : BaseState<UnitController>
         state.animator.SetBool("Move", false);
         state.animator.SetTrigger("Attack");
         state.rigid.linearVelocity = Vector3.zero;
-        if(state.isAD)
+
+        switch (state.mercenary.mercenaryClass)
         {
-            state.StartCoroutine(PlayBowAnimation(state));
+            case MercenaryClass.Archer: state.StartCoroutine(PlayBowAnimation(state)); break;
+            case MercenaryClass.Healer: state.StartCoroutine(Healing(state)); break;
         }
+
         state.StartCoroutine(AtkCo(state));
     }
 
@@ -129,13 +141,23 @@ public class UnitAttack : BaseState<UnitController>
 
     private IEnumerator PlayBowAnimation(UnitController state)
     {
-        state.Mp += 10;
         yield return new WaitForSeconds(0.5f);
+        state.Mp += 10;
         state.band.DOMove(state.pullPosition.position, 0.15f).SetEase(Ease.OutQuad);
         yield return new WaitForSeconds(0.1f);
         state.band.DOMove(state.restPosition.position, 0.08f).SetEase(Ease.OutBounce);
         yield return new WaitForSeconds(0.08f);
         state.ExitArrow();
+    }
+
+    private IEnumerator Healing(UnitController state)
+    {
+        yield return new WaitForSeconds(1f);
+        state.Mp += 10;
+        if(state.viewDetector.Target != null)
+        {
+            state.viewDetector.Target.GetComponent<UnitController>().Healing(state.atk);
+        }
     }
 
     private IEnumerator AtkCo(UnitController state)
@@ -155,6 +177,9 @@ public class UnitSkill : BaseState<UnitController>
         switch(state.mercenary.mercenaryClass)
         {
             case MercenaryClass.SwordMan : state.StartCoroutine(SwordManSkill(state)); break;
+            case MercenaryClass.Archer: state.StartCoroutine(ArcherSkill(state)); break;
+            case MercenaryClass.Shielder: ShielderSkill(state); break;
+            case MercenaryClass.Healer: state.StartCoroutine(HealingSkill(state)); break;
         }
     }
 
@@ -177,12 +202,68 @@ public class UnitSkill : BaseState<UnitController>
         yield return new WaitForSeconds(1.25f);
         state.skill[1].gameObject.SetActive(false);
         state.skill[0].transform.position = state.skillPos.position;
-        Vector3 rot = state.skill[0].transform.eulerAngles;
-        rot.y = state.transform.eulerAngles.y;
-        state.skill[0].transform.eulerAngles = rot;
+        state.skill[0].transform.rotation = Quaternion.Euler(0, state.transform.eulerAngles.y, 90);
         state.skill[0].GetComponent<Bullet>().BulletSetting(state.atk * state.skillDmg, state.critRate);
         state.skill[0].gameObject.SetActive(true);
         state.skill[0].Play();
+    }
+
+    private IEnumerator ArcherSkill(UnitController state)
+    {
+        state.animator.SetTrigger("Skill_0");
+
+        yield return new WaitForSeconds(1.25f);
+        state.skill[1].gameObject.SetActive(true);
+        state.skill[1].Play();
+        state.band.DOMove(state.pullPosition.position, 0.15f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.42f);
+        state.band.DOMove(state.restPosition.position, 0.08f).SetEase(Ease.OutBounce);
+        yield return new WaitForSeconds(0.08f);
+        state.skill[0].transform.position = state.skillPos.position;
+        state.viewDetector.FindAttackTarget();
+        if(state.viewDetector.AttackTarget != null )
+        {
+            state.skill[0].GetComponent<Tornado>().SetTarget(state, state.viewDetector.AttackTarget.GetComponent<MonsterController>());
+        }
+        state.skill[1].gameObject.SetActive(false);
+        state.skill[0].gameObject.SetActive(true);
+        state.skill[0].Play();
+    }
+
+    private void ShielderSkill(UnitController state)
+    {
+        state.animator.SetTrigger("Skill_0");
+        List<UnitController> allies = state.viewDetector.FindSheldTarget();
+        state.StartCoroutine(ShieldSkillCo(state, state, state.skill[2]));
+        if (allies.Count == 0) return;
+
+        for (int i = 0; i <  allies.Count; i++)
+        {
+            state.StartCoroutine(ShieldSkillCo(state, allies[i], state.skill[i]));
+        }
+    }
+
+    private IEnumerator ShieldSkillCo(UnitController state, UnitController target, ParticleSystem skill)
+    {
+        yield return new WaitForSeconds(0.1f);
+        skill.transform.position = state.skillPos.position;
+        skill.gameObject.SetActive(true);
+        skill.Play();
+        Vector3 upPos = state.transform.position + Vector3.up * 5f;
+        skill.transform.DOMove(upPos, 0.3f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.3f);
+        skill.transform.DOMove(target.transform.position + Vector3.up * 2f, 0.4f).SetEase(Ease.InQuad);
+        yield return new WaitForSeconds(0.4f);
+        target.shieldObj = skill.gameObject;
+        target.ShieldOn(state.atk * state.skillDmg);
+    }
+
+    private IEnumerator HealingSkill(UnitController state)
+    {
+        state.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(0.5f);
+        state.skill[0].Play();
+        state.viewDetector.AllFindHealHeal(state.atk * state.skillDmg);
     }
 }
 
@@ -224,14 +305,30 @@ public class UnitController : MonoBehaviour
         set
         {
             mp = value;
-            mpBar.value = Mathf.Clamp01(mp / maxMp);
             if(mp >= maxMp)
             {
                 mp -= maxMp;
                 ChangeState(UnitState.Skill);
             }
+            mpBar.value = Mathf.Clamp01(mp / maxMp);
         }
     }
+    [SerializeField] private float shield;
+    public float Shield
+    {
+        get { return shield; }
+        set
+        {
+            shield = value;
+            if(shield <= 0 && shieldObj != null)
+            {
+                shieldObj.SetActive(false);
+            }
+            shieldBar.value = Mathf.Clamp01(shield / maxShield);
+        }
+    }
+
+    public float maxShield;
     public float maxMp;
     public float maxHp;
     public float atk;
@@ -249,7 +346,7 @@ public class UnitController : MonoBehaviour
     public UnitState unitState;
     [SerializeField] private Slider hpBar;
     [SerializeField] private Slider mpBar;
-    public Transform canvas;
+    [SerializeField] private Slider shieldBar;
     public Transform skillPos;
     public ParticleSystem[] skill;
     [SerializeField] private GameObject arrowtPrefab;
@@ -257,8 +354,11 @@ public class UnitController : MonoBehaviour
     public Transform band;
     public Transform restPosition;
     public Transform pullPosition;
-
+    public TextManager textManager;
+    [SerializeField] private Transform center;
+    public ParticleSystem heal;
     private StateMachine<UnitState, UnitController> stateMachine = new StateMachine<UnitState, UnitController>();
+    public GameObject shieldObj;
 
     public Vector3 orignPos;
 
@@ -294,6 +394,8 @@ public class UnitController : MonoBehaviour
         critDmg = mercenary.criticalDamage;
         skillDmg = mercenary.skillDamage;
         speed = mercenary.speed;
+        maxShield = 1;
+        Shield = 0;
     }
 
     private void Start()
@@ -305,6 +407,56 @@ public class UnitController : MonoBehaviour
                 GameObject bullet = Instantiate(arrowtPrefab, band);
                 arrowStack.Push(bullet);
             }
+        }
+    }
+
+    public void Update()
+    {
+        stateMachine.Update();
+    }
+
+    public void FixedUpdate()
+    {
+        stateMachine.FixedUpdate();
+    }
+
+    public void TakeHit(float damage)
+    {
+        if(Shield > 0)
+        {
+            if (Shield < damage)
+            {
+                Hp -= (damage - Shield);
+                Shield = 0;
+            }
+            else
+            {
+                Shield -= damage;
+            }
+        }
+        else
+        {
+            Hp -= damage;
+        }
+    }
+
+    public void ShieldOn(float value)
+    {
+        StartCoroutine(ShieldCo(value));
+    }
+
+    public void Healing(float value)
+    {
+        heal.Play();
+        textManager.ShowDamageText(value, TextType.Normal);
+        float maxHeal = Hp + value;
+        if(maxHeal > maxHp)
+        {
+            Hp = maxHp;
+        }
+        else
+        {
+            Hp += value;
         }
     }
 
@@ -383,19 +535,22 @@ public class UnitController : MonoBehaviour
         arrowStack.Push(arrow);
     }
 
-    public void Update()
-    {
-        stateMachine.Update();
-    }
-
-    public void FixedUpdate()
-    {
-        stateMachine.FixedUpdate();
-    }
 
     public void ChangeState(UnitState state)
     {
         stateMachine.ChangeState(state);
         unitState = state;
+    }
+
+    private IEnumerator ShieldCo(float value)
+    {
+        Shield = value;
+        maxShield = Shield;
+
+        shieldObj.transform.parent = transform;
+        shieldObj.transform.position = center.position;
+        yield return new WaitForSeconds(5f);
+        shieldObj.gameObject.SetActive(false);
+        Shield = 0;
     }
 }
