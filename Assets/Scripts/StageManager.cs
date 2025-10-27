@@ -7,10 +7,11 @@ public class StageManager : Singleton<StageManager>
 {
     public Stage[] stage;
     public Transform[] startPos;
-    public bool isStage = false;
     public int stageIndex;
     [SerializeField] private TextMeshProUGUI startText;
     private Vector3 originPos;
+    public bool isStage = false;
+    private bool isStartStage = true;
 
     private new void Awake()
     {
@@ -36,11 +37,15 @@ public class StageManager : Singleton<StageManager>
 
     public void StageStart()
     {
-        StartCoroutine(StartCo());
+        if(isStartStage)
+        {
+            StartCoroutine(StartCo());
+        }
     }
 
     private IEnumerator StartCo()
     {
+        isStartStage = false;
         startText.gameObject.SetActive(true);
         startText.text = "3";
         startText.transform.localScale = originPos;

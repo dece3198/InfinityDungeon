@@ -5,6 +5,7 @@ public class Bullet : MonoBehaviour
 {
     [SerializeField] private float speed;
     public float critRate;
+    public float critDmg;
     public float damage;
 
     private void OnEnable()
@@ -32,10 +33,11 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    public void BulletSetting(float d, float P)
+    public void BulletSetting(float d, float P, float c)
     {
         damage = d;
         critRate = P;
+        critDmg = c;
     }
 
     private IEnumerator StartCo()

@@ -2428,6 +2428,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitController
   hp: 0
   mp: 0
+  shield: 0
+  maxShield: 0
   maxMp: 0
   maxHp: 0
   atk: 0
@@ -2444,11 +2446,22 @@ MonoBehaviour:
   unitState: 0
   hpBar: {fileID: 0}
   mpBar: {fileID: 0}
-  canvas: {fileID: 0}
+  shieldBar: {fileID: 0}
+  skillPos: {fileID: 0}
+  skill: []
+  arrowtPrefab: {fileID: 0}
+  band: {fileID: 0}
+  restPosition: {fileID: 0}
+  pullPosition: {fileID: 0}
+  textManager: {fileID: 0}
+  center: {fileID: 0}
+  shieldObj: {fileID: 0}
   orignPos: {x: 0, y: 0, z: 0}
   isMan: 0
   isWait: 0
   isSelect: 0
+  isAD: 0
+  isAtk: 1
 --- !u!114 &9046959893564259944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2470,6 +2483,9 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 256
+  sheldMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!4 &8207318351464026041 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4310770610479270847, guid: ab40ba95e1971dd4a8903ea694e268d7, type: 3}

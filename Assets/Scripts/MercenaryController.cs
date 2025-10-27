@@ -215,9 +215,9 @@ public class MercenaryController : MonoBehaviour
         LobbyManager.instance.curMercenary = this;
         paper.SetActive(true);
         ChangeState(MercenaryState.Walk);
-        mercenary.isCharacterImageFake = Random.value < 0.2f;
+        mercenary.isCharacterImageFake = Random.value < 0.1f;
         mercenary.isCoatingImageFake = Random.value < 0.2f;
-        mercenary.isInsigniaFake = Random.value < 0.2f;
+        mercenary.isInsigniaFake = Random.value < 0.3f;
 
         mercenary.CalculateStats();
 

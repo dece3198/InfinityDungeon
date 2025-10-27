@@ -40,23 +40,23 @@ public class Tornado : MonoBehaviour
             if(monster != null)
             {
                 IInteraction interaction  = other.GetComponent<IInteraction>();
-
+                float skill = unit.atk * unit.skillDmg;
                 if (Random.value < unit.critRate)
                 {
-                    StartCoroutine(AttackCo(unit, TextType.Critical, interaction));
+                    StartCoroutine(AttackCo(skill * unit.critDmg, TextType.Critical, interaction));
                 }
                 else
                 {
-                    StartCoroutine(AttackCo(unit, TextType.Normal, interaction));
+                    StartCoroutine(AttackCo(skill, TextType.Normal, interaction));
                 }
             }
         }
     }
 
-    private IEnumerator AttackCo(UnitController unit, TextType textType, IInteraction interaction)
+    private IEnumerator AttackCo(float damage, TextType textType, IInteraction interaction)
     {
         isAtk = false;
-        interaction.TakeHit(unit.atk * unit.skillDmg, textType);
+        interaction.TakeHit(damage, textType);
         yield return new WaitForSeconds(0.5f);
         isAtk = true;
     }

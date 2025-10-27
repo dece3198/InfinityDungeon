@@ -31,10 +31,11 @@ public class Arrow : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         MonsterController monster = other.GetComponent<MonsterController>();
-
         if (monster != null && monster == target)
         {
-            if(Random.value < unit.critRate)
+            unit.skill[0].transform.position = monster.transform.position + Vector3.up * 2;
+            unit.skill[0].Play();
+            if (Random.value < unit.critRate)
             {
                 other.GetComponent<IInteraction>().TakeHit(unit.atk * unit.critDmg, TextType.Critical);
             }

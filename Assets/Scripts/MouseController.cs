@@ -9,6 +9,7 @@ public enum UnitSlotType
 public class MouseController : Singleton<MouseController>
 {
     [SerializeField] private GameObject grid;
+    [SerializeField] private GameObject selectEffect;
     public UnitSlot curSlot;
     public UnitController selectedUnit;
     private Camera cam;
@@ -33,6 +34,9 @@ public class MouseController : Singleton<MouseController>
                 {
                     selectedUnit = unit;
                     grid.SetActive(true);
+                    selectEffect.SetActive(true);
+                    selectEffect.transform.parent = unit.transform;
+                    selectEffect.transform.localPosition = Vector3.zero;
                     unit.OnSelect();
                 }
             }
@@ -43,7 +47,7 @@ public class MouseController : Singleton<MouseController>
             Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
             Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-
+            
             if (groundPlane.Raycast(ray, out float enter))
             {
                 Vector3 worldPos = ray.GetPoint(enter);
@@ -56,6 +60,7 @@ public class MouseController : Singleton<MouseController>
             if (selectedUnit != null)
             {
                 grid.SetActive(false);
+                selectEffect.SetActive(false);
                 selectedUnit.OnRelease();
                 selectedUnit = null;
             }

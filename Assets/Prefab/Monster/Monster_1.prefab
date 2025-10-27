@@ -758,7 +758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterController
   hp: 1000
   maxHp: 0
-  speed: 5
+  speed: 1
   atk: 10
   atkSpeed: 2
   renderers:

@@ -25,6 +25,19 @@ public class ViewDetector : MonoBehaviour
 
     public void FindTarget()
     {
+        if (Target != null)
+        {
+            // 대상이 여전히 존재하고 활성화되어 있으며, 거리 안에 있다면 유지
+            float dist = Vector3.Distance(transform.position, Target.transform.position);
+            if (Target.activeSelf)
+            {
+                return; // 기존 타겟 계속 사용
+            }
+
+            // 타겟이 사라지거나 너무 멀리 벗어나면 초기화
+            attackTarget = null;
+        }
+
         Collider[] targets = Physics.OverlapSphere(transform.position, radius, layerMask);
         float min = Mathf.Infinity;
 
@@ -86,25 +99,43 @@ public class ViewDetector : MonoBehaviour
 
     public void FindAttackTarget()
     {
+        //기존 타겟 유지 조건
+        if (attackTarget != null)
+        {
+            // 대상이 여전히 존재하고 활성화되어 있으며, 거리 안에 있다면 유지
+            float dist = Vector3.Distance(transform.position, attackTarget.transform.position);
+            if (attackTarget.activeSelf && dist <= attackRadius * 2f)
+            {
+                return; // 기존 타겟 계속 사용
+            }
+
+            // 타겟이 사라지거나 너무 멀리 벗어나면 초기화
+            attackTarget = null;
+        }
+
+        //새 타겟 탐색
         Collider[] targets = Physics.OverlapSphere(transform.position, attackRadius, layerMask);
+        float min = Mathf.Infinity;
+        GameObject bestTarget = null;
 
         for (int i = 0; i < targets.Length; i++)
         {
-
             if (targets[i].gameObject == gameObject)
                 continue;
 
             Vector3 findTarget = (targets[i].transform.position - transform.position).normalized;
             if (Vector3.Dot(transform.forward, findTarget) < Mathf.Cos(atkAngle * 0.5f * Mathf.Deg2Rad))
-            {
                 continue;
-            }
 
-            attackTarget = targets[i].gameObject;
-            return;
+            float dist = Vector3.Distance(transform.position, targets[i].transform.position);
+            if (dist < min)
+            {
+                min = dist;
+                bestTarget = targets[i].gameObject;
+            }
         }
 
-        attackTarget = null;
+        attackTarget = bestTarget;
     }
 
     public List<UnitController> FindSheldTarget()
@@ -183,7 +214,7 @@ public class ViewDetector : MonoBehaviour
 
     public void AllFindHealHeal(float value)
     {
-        Collider[] targets = Physics.OverlapSphere(transform.position, attackRadius, layerMask);
+        Collider[] targets = Physics.OverlapSphere(transform.position, attackRadius * 1.5f, layerMask);
 
         for (int i = 0; i < targets.Length; i++)
         {
@@ -201,6 +232,56 @@ public class ViewDetector : MonoBehaviour
             unit.Healing(value);
         }
         target = null;
+    }
+
+    public void FindFarTarget()
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, radius, layerMask);
+        float max = 0;
+
+        for (int i = 0; i < targets.Length; i++)
+        {
+            Vector3 findTarget = (targets[i].transform.position - transform.position).normalized;
+            if (Vector3.Dot(transform.forward, findTarget) < Mathf.Cos(angle * 0.5f * Mathf.Deg2Rad))
+            {
+                continue;
+            }
+
+            float findTargetRange = Vector3.Distance(transform.position, targets[i].transform.position);
+
+            Debug.DrawRay(transform.position, findTarget * findTargetRange, Color.red);
+
+            if (findTargetRange > max)
+            {
+                max = findTargetRange;
+                target = targets[i].gameObject;
+            }
+        }
+
+        if (targets.Length <= 0)
+        {
+            target = null;
+        }
+    }
+
+    public void FindRangeAttack(float skillDmg, float critRate, float critDmg)
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, attackRadius * 2, layerMask);
+
+        for(int i = 0; i < targets.Length; i++)
+        {
+            if (!targets[i].TryGetComponent(out IInteraction m))
+                continue;
+
+            if(Random.value < critRate)
+            {
+                m.TakeHit(skillDmg * critDmg, TextType.Critical);
+            }
+            else
+            {
+                m.TakeHit(skillDmg, TextType.Normal);
+            }
+        }
     }
 
     private void OnDrawGizmosSelected()

@@ -76,7 +76,7 @@ public class Mercenary : ScriptableObject
                 atk = 25; atkSpeed = 3f;  def = 1; speed = 1; hp = 400; skillDamage = 5f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Lancer:
-                atk = 20; atkSpeed = 1.5f; def = 5; speed = 1; hp = 150; skillDamage = 5f; criticalPercent = 0.35f; criticalDamage = 2f;
+                atk = 20; atkSpeed = 1.5f; def = 5; speed = 1; hp = 150; skillDamage = 1f; criticalPercent = 0.35f; criticalDamage = 3f;
                 break;
             case MercenaryClass.Berserker:
                 atk = 50; atkSpeed = 2f; def = 20; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
@@ -85,7 +85,7 @@ public class Mercenary : ScriptableObject
                 atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 4f;
                 break;
             case MercenaryClass.Warrior:
-                atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.35f; criticalDamage = 4f;
+                atk = 7; atkSpeed = 1f; def = 10; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.35f; criticalDamage = 4f;
                 break;
             case MercenaryClass.Thrower:
                 atk = 7; atkSpeed = 0.5f; def = 10; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 4f;
@@ -150,10 +150,10 @@ public class Mercenary : ScriptableObject
             case MercenaryClass.FocusWizard: return (5f, 2f, 10f, 50f, 1f, 0.1f, 2f, 30f);
             case MercenaryClass.Assassin: return (7f, 0.5f, 20f, 50f, 2f, 0.75f, 4f, 4f);
             case MercenaryClass.Mauler: return (25f, 3f, 1f, 400f, 1f, 0.5f, 2f, 5f);
-            case MercenaryClass.Lancer: return (20f, 1.5f, 5f, 150f, 1f, 0.35f, 2f, 5f);
+            case MercenaryClass.Lancer: return (20f, 1.5f, 5f, 150f, 1f, 0.35f, 3f, 1f);
             case MercenaryClass.Berserker: return (50f, 2f, 20f, 50f, 1f, 0.25f, 2f, 4f);
             case MercenaryClass.Hunter: return (7f, 0.5f, 10f, 50f, 1f, 0.75f, 4f, 4f);
-            case MercenaryClass.Warrior: return (7f, 0.5f, 10f, 100f, 1f, 0.35f, 4f, 4f);
+            case MercenaryClass.Warrior: return (7f, 1f, 10f, 100f, 1f, 0.35f, 4f, 4f);
             case MercenaryClass.Thrower: return (7f, 0.5f, 10f, 50f, 1f, 0.75f, 4f, 4f);
             case MercenaryClass.Tanker: return (10f, 2f, 10f, 500f, 1f, 0.75f, 2f, 4f);
             case MercenaryClass.Healer: return (20f, 2f, 5f, 50f, 1f, 0f, 0f, 4f);

@@ -43,24 +43,28 @@ public class MonsterWalk : BaseState<MonsterController>
 
     public override void FixedUpdate(MonsterController state)
     {
-        if(state.viewDetector.Target == null)
+        if (state.viewDetector.Target == null)
         {
             state.ChangeState(MonsterState.Idle);
         }
         else
         {
+            state.canvas.eulerAngles = Vector3.zero;
             Transform target = state.viewDetector.Target.transform;
             Vector3 dir = (target.position - state.transform.position).normalized;
             dir.y = 0f;
             Vector3 moveVec = dir * state.speed * Time.fixedDeltaTime;
-            state.rigid.MovePosition(state.rigid.position + moveVec);
+            if (state.viewDetector.AttackTarget == null)
+            {
+                state.rigid.MovePosition(state.rigid.position + moveVec);
+            }
             state.rigid.linearVelocity = Vector3.zero;
             if (dir != Vector3.zero)
             {
-                state.canvas.eulerAngles = Vector3.zero;
                 Quaternion targetRot = Quaternion.LookRotation(dir);
-                state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 0.2f);
+                state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 5f);
             }
+
         }
     }
 
@@ -109,6 +113,7 @@ public class MonsterAttack : BaseState<MonsterController>
 
     public override void FixedUpdate(MonsterController state)
     {
+        state.canvas.eulerAngles = Vector3.zero;
     }
 
     public override void Update(MonsterController state)

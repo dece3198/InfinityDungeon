@@ -49,21 +49,15 @@ public class TextManager : MonoBehaviour
 
         if (textType == TextType.Normal)
         {
-            if (basicStack.Count == 0)
-            {
-                Refill(5, textType);
-            }
+            Refill(5, 0, basicStack);
             damageText = basicStack.Pop();
         }
         else
         {
-            if (criticalStack.Count == 0)
-            {
-                Refill(5, textType);
-            }
+            Refill(5, 1, criticalStack);
             damageText = criticalStack.Pop();
         }
-
+            
         if (damage >= 1_000_000)
         {
             damageText.text = (damage / 1000000).ToString("0.#") + "M";
@@ -89,20 +83,13 @@ public class TextManager : MonoBehaviour
         });
     }
 
-    private void Refill(int count, TextType textType)
+    private void Refill(int count, int prefabIndex, Stack<TextMeshProUGUI> targetStack)
     {
         for (int i = 0; i < count; i++)
         {
-            TextMeshProUGUI damageText = Instantiate(textPrefab[i], transform).GetComponent<TextMeshProUGUI>();
-            damageText.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-            if (textType == TextType.Normal)
-            {
-                basicStack.Push(damageText);
-            }
-            else
-            {
-                criticalStack.Push(damageText);
-            }
+            var damageText = Instantiate(textPrefab[prefabIndex], transform).GetComponent<TextMeshProUGUI>();
+            damageText.transform.localScale = Vector3.one * 0.1f;
+            targetStack.Push(damageText);
         }
     }
 

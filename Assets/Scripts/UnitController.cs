@@ -1,13 +1,322 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
 public enum UnitState
 {
     Idle, Walk, Stun, Attack, Skill, Die
+}
+
+public abstract class SkillBehaviour
+{
+    public abstract IEnumerator Skill(UnitController unit);
+}
+
+public class SwordManSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        unit.skill[2].gameObject.SetActive(true);
+        yield return new WaitForSeconds(1.25f);
+        unit.skill[2].gameObject.SetActive(false);
+        unit.skill[1].transform.position = unit.skillPos.position;
+        unit.skill[1].transform.rotation = Quaternion.Euler(0, unit.transform.eulerAngles.y, 90);
+        unit.skill[1].GetComponent<Bullet>().BulletSetting(unit.atk * unit.skillDmg, unit.critRate, unit.critDmg);
+        unit.skill[1].gameObject.SetActive(true);
+        unit.skill[1].Play();
+        if(unit.viewDetector.AttackTarget != null)
+        {
+            unit.skill[3].transform.position = unit.viewDetector.AttackTarget.transform.position;
+            unit.skill[3].Play();
+        }
+    }
+}
+
+public class ShielderSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+
+        List<UnitController> allies = unit.viewDetector.FindSheldTarget();
+
+        unit.StartCoroutine(ApplyShield(unit, unit, unit.skill[3]));
+
+        if (allies == null || allies.Count == 0)
+            yield break;
+
+        for (int i = 0; i < allies.Count; i++)
+        {
+            unit.StartCoroutine(ApplyShield(unit, allies[i], unit.skill[i + 1]));
+        }
+    }
+
+    private IEnumerator ApplyShield(UnitController state, UnitController target, ParticleSystem skill)
+    {
+        yield return new WaitForSeconds(0.1f);
+        skill.transform.position = state.skillPos.position;
+        skill.gameObject.SetActive(true);
+        skill.Play();
+        Vector3 upPos = state.transform.position + Vector3.up * 5f;
+        skill.transform.DOMove(upPos, 0.3f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.3f);
+        skill.transform.DOMove(target.transform.position + Vector3.up * 2f, 0.4f).SetEase(Ease.InQuad);
+        yield return new WaitForSeconds(0.4f);
+        target.shieldObj = skill.gameObject;
+        target.ShieldOn(state.atk * state.skillDmg);
+    }
+}
+
+public class ArcherSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+
+        yield return new WaitForSeconds(1.25f);
+        unit.skill[2].gameObject.SetActive(true);
+        unit.skill[2].Play();
+        unit.band.DOMove(unit.pullPosition.position, 0.15f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.42f);
+        unit.band.DOMove(unit.restPosition.position, 0.08f).SetEase(Ease.OutBounce);
+        yield return new WaitForSeconds(0.08f);
+        unit.skill[1].transform.position = unit.skillPos.position;
+        unit.viewDetector.FindAttackTarget();
+        if (unit.viewDetector.AttackTarget != null)
+        {
+            unit.skill[1].GetComponent<Tornado>().SetTarget(unit, unit.viewDetector.AttackTarget.GetComponent<MonsterController>());
+        }
+        unit.skill[2].gameObject.SetActive(false);
+        unit.skill[1].gameObject.SetActive(true);
+        unit.skill[1].Play();
+    }
+}
+
+public class HealerSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(0.5f);
+        unit.skill[1].Play();
+        unit.viewDetector.AllFindHealHeal(unit.atk * unit.skillDmg);
+    }
+}
+
+public class AssassinSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(0.8f);
+        unit.gameObject.layer = 0;
+        unit.band.gameObject.SetActive(false);
+        unit.pullPosition.gameObject.SetActive(false);
+        unit.restPosition.gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.1f);
+        unit.skill[1].Play();
+        yield return new WaitForSeconds(1f);
+        unit.viewDetector.FindFarTarget();
+        if (unit.viewDetector.Target != null)
+        {
+            Transform t = unit.viewDetector.Target.transform;
+            Vector3 behind = t.position - t.forward * 2f; // ¶Ç´Â t.position + (-t.forward * 2f)
+            unit.transform.position = behind;
+        }
+        yield return new WaitForSeconds(0.5f);
+        unit.skill[2].Play();
+        Transform target = unit.viewDetector.AttackTarget.transform;
+        Vector3 dir = (target.position - unit.transform.position).normalized;
+        Quaternion targetRot = Quaternion.LookRotation(dir);
+        unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, targetRot, 5f);
+        yield return new WaitForSeconds(0.5f);
+        unit.band.gameObject.SetActive(true);
+        unit.pullPosition.gameObject.SetActive(true);
+        unit.restPosition.gameObject.SetActive(true);
+        unit.animator.SetTrigger("Skill_1");
+        yield return new WaitForSeconds(0.5f);
+        if(unit.viewDetector.AttackTarget.TryGetComponent(out IInteraction m) && unit.viewDetector.AttackTarget != null)
+        {
+            float skillD = unit.atk * unit.skillDmg;
+            if (Random.value < unit.critRate)
+            {
+                m.TakeHit(skillD * unit.critDmg, TextType.Critical);
+            }
+            else
+            {
+                m.TakeHit(skillD, TextType.Normal);
+            }
+        }
+        unit.skill[3].Play();
+        yield return new WaitForSeconds(0.5f);
+        unit.gameObject.layer = 7;
+    }
+}
+
+public class MaulerSkill : SkillBehaviour
+{
+    private Vector3 orignScale;
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.atk = unit.atk * 2;
+        unit.Hp += unit.maxHp;
+        unit.maxHp = unit.maxHp * 2;
+        orignScale = unit.transform.localScale;
+        unit.transform.DOScale(orignScale * 2, 1.5f).SetEase(Ease.OutBack);
+        unit.ChangeState(UnitState.Idle);
+        yield return new WaitForSeconds(10f);
+        unit.transform.DOScale(orignScale, 1f).SetEase(Ease.Linear);
+        unit.atk /= 2;
+        unit.maxHp /= 2;
+        unit.Hp -= unit.maxHp;
+    }
+}
+
+public class LancerSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(0.1f);
+        unit.skill[1].gameObject.SetActive(true);
+        for(int i = 0; i < 8; i++)
+        {
+            if (unit.viewDetector.AttackTarget.TryGetComponent(out IInteraction target))
+            {
+                if (Random.value < unit.critRate)
+                {
+                    target.TakeHit(unit.atk * unit.critDmg, TextType.Critical);
+                }
+                else
+                {
+                    target.TakeHit(unit.atk, TextType.Normal);
+                }
+                yield return new WaitForSeconds(0.1733f);
+            }
+        }
+        unit.skill[1].gameObject.SetActive(false);
+    }
+}
+
+public class BerserkerSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(0.75f);
+        unit.skill[3].gameObject.SetActive(true);
+        unit.skill[1].Play();
+        yield return new WaitForSeconds(1f);
+        unit.skill[2].Play();
+        float skillD = unit.atk * unit.skillDmg;
+        unit.viewDetector.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
+        unit.skill[3].gameObject.SetActive(false);
+    }
+}
+
+public class HunterSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_1");
+        yield return new WaitForSeconds(0.5f);
+        unit.band.DOMove(unit.pullPosition.position, 0.15f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.5f);
+        unit.band.DOMove(unit.restPosition.position, 0.08f).SetEase(Ease.OutBounce);
+        yield return new WaitForSeconds(0.07f);
+        unit.skill[1].Play();
+        yield return new WaitForSeconds(0.5f);
+        unit.viewDetector.FindAttackTarget();
+        if(unit.viewDetector.AttackTarget != null)
+        {
+            unit.skillPos.position = unit.viewDetector.AttackTarget.transform.position;
+            unit.skill[2].Play();
+            yield return new WaitForSeconds(1.5f);
+            ViewDetector skill = unit.skillPos.GetComponent<ViewDetector>();
+            float skillD = unit.atk * unit.skillDmg;
+            for (int i = 0; i < 5; i++)
+            {
+                yield return new WaitForSeconds(0.15f);
+                skill.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
+            }
+        }
+    }
+}
+
+public class WarriorSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        unit.restPosition.gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.5f);
+        unit.pullPosition.gameObject.SetActive(true);
+        unit.pullPosition.DOScale(unit.pullPosition.localScale * 2,1f).SetEase(Ease.OutBack);
+        yield return new WaitForSeconds(1.25f);
+        unit.skill[1].transform.position = unit.viewDetector.AttackTarget.transform.position;
+        unit.skill[1].Play();
+        if(unit.skill[1].TryGetComponent(out ViewDetector v))
+        {
+            float skillD = unit.atk * unit.skillDmg;
+            v.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
+        }
+        yield return new WaitForSeconds(1f);
+        unit.pullPosition.DOScale(unit.pullPosition.localScale / 2, 1f).SetEase(Ease.OutBack);
+        unit.pullPosition.gameObject.SetActive(false);
+        unit.restPosition.gameObject.SetActive(true);
+    }
+}
+
+public class ThrowerSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(1f);
+        unit.skill[1].Play();
+        yield return new WaitForSeconds(1f);
+        unit.viewDetector.FindAttackTarget();
+        if (unit.viewDetector.AttackTarget != null)
+        {
+            unit.skillPos.transform.position = unit.viewDetector.AttackTarget.transform.position;
+            unit.skill[2].Play();
+            yield return new WaitForSeconds(0.5f);
+            ViewDetector skill = unit.skillPos.GetComponent<ViewDetector>();
+            float skillD = unit.atk * unit.skillDmg;
+            for (int i = 0; i < 3; i++)
+            {
+                yield return new WaitForSeconds(0.15f);
+                skill.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
+            }
+        }
+    }
+}
+
+public class TankerSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        yield return null;
+    }
+}
+
+public class FocusWizardSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        yield return null;
+    }
+}
+
+public class AreaWizardSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        yield return null;
+    }
 }
 
 public class UnitIdle : BaseState<UnitController>
@@ -66,17 +375,20 @@ public class UnitWalk : BaseState<UnitController>
         }
         else
         {
+            state.textManager.transform.eulerAngles = Vector3.zero;
             Transform target = state.viewDetector.Target.transform;
             Vector3 dir = (target.position - state.transform.position).normalized;
             dir.y = 0f;
             Vector3 moveVec = dir * state.speed * Time.fixedDeltaTime;
-            state.rigid.MovePosition(state.rigid.position + moveVec);
+            if (state.viewDetector.AttackTarget == null)
+            {
+                state.rigid.MovePosition(state.rigid.position + moveVec);
+            }
             state.rigid.linearVelocity = Vector3.zero;
             if (dir != Vector3.zero)
             {
-                state.textManager.transform.eulerAngles = Vector3.zero;
                 Quaternion targetRot = Quaternion.LookRotation(dir);
-                state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 0.2f);
+                state.transform.rotation = Quaternion.Slerp(state.transform.rotation, targetRot, 5f);
             }
         }
     }
@@ -112,19 +424,33 @@ public class UnitStun : BaseState<UnitController>
 
 public class UnitAttack : BaseState<UnitController>
 {
+    private bool isAtk = false;
     public override void Enter(UnitController state)
     {
         state.animator.SetBool("Move", false);
-        state.animator.SetTrigger("Attack");
         state.rigid.linearVelocity = Vector3.zero;
 
-        switch (state.mercenary.mercenaryClass)
+        if(state.isAtk)
         {
-            case MercenaryClass.Archer: state.StartCoroutine(PlayBowAnimation(state)); break;
-            case MercenaryClass.Healer: state.StartCoroutine(Healing(state)); break;
+            if(state.mercenary.mercenaryClass != MercenaryClass.Warrior)
+            {
+                state.animator.SetTrigger("Attack");
+            }
+            
+            state.StartCoroutine(AtkCo(state));
+            switch (state.mercenary.mercenaryClass)
+            {
+                case MercenaryClass.Archer: state.StartCoroutine(PlayBowAnimation(state)); break;
+                case MercenaryClass.Healer: state.StartCoroutine(Healing(state)); break;
+                case MercenaryClass.Hunter: state.StartCoroutine(PlayBowAnimation(state)); break;
+                case MercenaryClass.Warrior: state.StartCoroutine(WarriorAtkCo(state)); break;
+                case MercenaryClass.Thrower: state.StartCoroutine(PlayBowAnimation(state)); break;
+            }
         }
-
-        state.StartCoroutine(AtkCo(state));
+        else
+        {
+            state.ChangeState(UnitState.Idle);
+        }
     }
 
     public override void Exit(UnitController state)
@@ -133,6 +459,7 @@ public class UnitAttack : BaseState<UnitController>
 
     public override void FixedUpdate(UnitController state)
     {
+        state.textManager.transform.eulerAngles = Vector3.zero;
     }
 
     public override void Update(UnitController state)
@@ -141,12 +468,8 @@ public class UnitAttack : BaseState<UnitController>
 
     private IEnumerator PlayBowAnimation(UnitController state)
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.49f);
         state.Mp += 10;
-        state.band.DOMove(state.pullPosition.position, 0.15f).SetEase(Ease.OutQuad);
-        yield return new WaitForSeconds(0.1f);
-        state.band.DOMove(state.restPosition.position, 0.08f).SetEase(Ease.OutBounce);
-        yield return new WaitForSeconds(0.08f);
         state.ExitArrow();
     }
 
@@ -154,7 +477,10 @@ public class UnitAttack : BaseState<UnitController>
     {
         yield return new WaitForSeconds(1f);
         state.Mp += 10;
-        if(state.viewDetector.Target != null)
+        state.skill[0].transform.parent = state.viewDetector.Target.transform;
+        state.skill[0].transform.localPosition = Vector3.zero;
+        state.skill[0].Play();
+        if (state.viewDetector.Target != null)
         {
             state.viewDetector.Target.GetComponent<UnitController>().Healing(state.atk);
         }
@@ -162,25 +488,42 @@ public class UnitAttack : BaseState<UnitController>
 
     private IEnumerator AtkCo(UnitController state)
     {
+        state.isAtk = false;
         yield return new WaitForSeconds(state.atkSpeed);
-        if(state.unitState != UnitState.Skill)
+        if(state.unitState == UnitState.Attack)
         {
             state.ChangeState(UnitState.Idle);
         }
+        state.isAtk = true;
+    }
+
+    private IEnumerator WarriorAtkCo(UnitController state)
+    {
+        isAtk = !isAtk;
+
+        float orignAtk = state.atk;
+
+        if (isAtk)
+        {
+            state.atk -= state.atk * 0.3f;
+            state.animator.SetTrigger("Attack");
+        }
+        else
+        {
+            state.animator.SetTrigger("Attack2");
+        }
+        yield return new WaitForSeconds(state.atkSpeed);
+        state.atk = orignAtk;
     }
 }
 
 public class UnitSkill : BaseState<UnitController>
 {
+
     public override void Enter(UnitController state)
     {
-        switch(state.mercenary.mercenaryClass)
-        {
-            case MercenaryClass.SwordMan : state.StartCoroutine(SwordManSkill(state)); break;
-            case MercenaryClass.Archer: state.StartCoroutine(ArcherSkill(state)); break;
-            case MercenaryClass.Shielder: ShielderSkill(state); break;
-            case MercenaryClass.Healer: state.StartCoroutine(HealingSkill(state)); break;
-        }
+        state.animator.SetBool("Move", false);
+        state.UseSKill();
     }
 
     public override void Exit(UnitController state)
@@ -193,77 +536,6 @@ public class UnitSkill : BaseState<UnitController>
 
     public override void Update(UnitController state)
     {
-    }
-
-    private IEnumerator SwordManSkill(UnitController state)
-    {
-        state.animator.SetTrigger("Skill_0");
-        state.skill[1].gameObject.SetActive(true);
-        yield return new WaitForSeconds(1.25f);
-        state.skill[1].gameObject.SetActive(false);
-        state.skill[0].transform.position = state.skillPos.position;
-        state.skill[0].transform.rotation = Quaternion.Euler(0, state.transform.eulerAngles.y, 90);
-        state.skill[0].GetComponent<Bullet>().BulletSetting(state.atk * state.skillDmg, state.critRate);
-        state.skill[0].gameObject.SetActive(true);
-        state.skill[0].Play();
-    }
-
-    private IEnumerator ArcherSkill(UnitController state)
-    {
-        state.animator.SetTrigger("Skill_0");
-
-        yield return new WaitForSeconds(1.25f);
-        state.skill[1].gameObject.SetActive(true);
-        state.skill[1].Play();
-        state.band.DOMove(state.pullPosition.position, 0.15f).SetEase(Ease.OutQuad);
-        yield return new WaitForSeconds(0.42f);
-        state.band.DOMove(state.restPosition.position, 0.08f).SetEase(Ease.OutBounce);
-        yield return new WaitForSeconds(0.08f);
-        state.skill[0].transform.position = state.skillPos.position;
-        state.viewDetector.FindAttackTarget();
-        if(state.viewDetector.AttackTarget != null )
-        {
-            state.skill[0].GetComponent<Tornado>().SetTarget(state, state.viewDetector.AttackTarget.GetComponent<MonsterController>());
-        }
-        state.skill[1].gameObject.SetActive(false);
-        state.skill[0].gameObject.SetActive(true);
-        state.skill[0].Play();
-    }
-
-    private void ShielderSkill(UnitController state)
-    {
-        state.animator.SetTrigger("Skill_0");
-        List<UnitController> allies = state.viewDetector.FindSheldTarget();
-        state.StartCoroutine(ShieldSkillCo(state, state, state.skill[2]));
-        if (allies.Count == 0) return;
-
-        for (int i = 0; i <  allies.Count; i++)
-        {
-            state.StartCoroutine(ShieldSkillCo(state, allies[i], state.skill[i]));
-        }
-    }
-
-    private IEnumerator ShieldSkillCo(UnitController state, UnitController target, ParticleSystem skill)
-    {
-        yield return new WaitForSeconds(0.1f);
-        skill.transform.position = state.skillPos.position;
-        skill.gameObject.SetActive(true);
-        skill.Play();
-        Vector3 upPos = state.transform.position + Vector3.up * 5f;
-        skill.transform.DOMove(upPos, 0.3f).SetEase(Ease.OutQuad);
-        yield return new WaitForSeconds(0.3f);
-        skill.transform.DOMove(target.transform.position + Vector3.up * 2f, 0.4f).SetEase(Ease.InQuad);
-        yield return new WaitForSeconds(0.4f);
-        target.shieldObj = skill.gameObject;
-        target.ShieldOn(state.atk * state.skillDmg);
-    }
-
-    private IEnumerator HealingSkill(UnitController state)
-    {
-        state.animator.SetTrigger("Skill_0");
-        yield return new WaitForSeconds(0.5f);
-        state.skill[0].Play();
-        state.viewDetector.AllFindHealHeal(state.atk * state.skillDmg);
     }
 }
 
@@ -356,16 +628,17 @@ public class UnitController : MonoBehaviour
     public Transform pullPosition;
     public TextManager textManager;
     [SerializeField] private Transform center;
-    public ParticleSystem heal;
     private StateMachine<UnitState, UnitController> stateMachine = new StateMachine<UnitState, UnitController>();
     public GameObject shieldObj;
 
     public Vector3 orignPos;
+    private SkillBehaviour skillBehaviour;
 
     public bool isMan;
     public bool isWait = true;
     public bool isSelect = false;
     public bool isAD = false;
+    public bool isAtk = true;
 
     private void Awake()
     {
@@ -381,6 +654,24 @@ public class UnitController : MonoBehaviour
         stateMachine.AddState(UnitState.Skill, new UnitSkill());
         stateMachine.AddState(UnitState.Die, new UnitDie());
         ChangeState(UnitState.Idle);
+
+        switch (mercenary.mercenaryClass)
+        {
+            case MercenaryClass.SwordMan: skillBehaviour = new SwordManSkill(); break;
+            case MercenaryClass.Shielder: skillBehaviour = new ShielderSkill(); break;
+            case MercenaryClass.Archer: skillBehaviour = new ArcherSkill(); break;
+            case MercenaryClass.Healer: skillBehaviour = new HealerSkill(); break;
+            case MercenaryClass.Assassin: skillBehaviour = new AssassinSkill(); break;
+            case MercenaryClass.Mauler: skillBehaviour = new MaulerSkill(); break;
+            case MercenaryClass.Lancer: skillBehaviour = new LancerSkill(); break;
+            case MercenaryClass.Berserker: skillBehaviour = new BerserkerSkill(); break;
+            case MercenaryClass.Hunter: skillBehaviour = new HunterSkill(); break;
+            case MercenaryClass.Warrior: skillBehaviour = new WarriorSkill(); break;
+            case MercenaryClass.Thrower: skillBehaviour = new ThrowerSkill(); break;
+            case MercenaryClass.Tanker: skillBehaviour = new TankerSkill(); break;
+            case MercenaryClass.FocusWizard: skillBehaviour = new FocusWizardSkill(); break;
+            case MercenaryClass.AreaWizard: skillBehaviour = new AreaWizardSkill(); break;
+        }
     }
 
     private void OnEnable()
@@ -440,6 +731,11 @@ public class UnitController : MonoBehaviour
         }
     }
 
+    public void UseSKill()
+    {
+        StartCoroutine(skillBehaviour.Skill(this));
+    }
+
     public void ShieldOn(float value)
     {
         StartCoroutine(ShieldCo(value));
@@ -447,7 +743,6 @@ public class UnitController : MonoBehaviour
 
     public void Healing(float value)
     {
-        heal.Play();
         textManager.ShowDamageText(value, TextType.Normal);
         float maxHeal = Hp + value;
         if(maxHeal > maxHp)
@@ -502,6 +797,8 @@ public class UnitController : MonoBehaviour
         if(viewDetector.AttackTarget != null)
         {
             Mp += 10;
+            skill[0].transform.position = viewDetector.AttackTarget.transform.position + Vector3.up * 2;
+            skill[0].Play();
             if (Random.value < critRate)
             {
                 viewDetector.AttackTarget.GetComponent<IInteraction>().TakeHit(atk * critDmg, TextType.Critical);
