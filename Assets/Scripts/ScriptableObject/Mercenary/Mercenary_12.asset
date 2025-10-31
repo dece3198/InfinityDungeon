@@ -23,14 +23,14 @@ MonoBehaviour:
   potentialityRank: 2
   mercenaryRank: 3
   rankValu: 18
-  atk: 29
-  atkSpeed: 0
+  atk: 18
+  atkSpeed: 2
   def: 1
   speed: 3
-  hp: 735
-  criticalPercent: 0.5
+  hp: 115
+  criticalPercent: 0.1
   criticalDamage: 2
-  skillDamage: 2
+  skillDamage: 30
   isCharacterImageFake: 1
   isCoatingImageFake: 0
   isInsigniaFake: 0

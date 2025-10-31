@@ -11,7 +11,7 @@ public class ViewDetector : MonoBehaviour
     public GameObject AttackTarget { get { return attackTarget; } }
 
     [SerializeField] private float radius;
-    [SerializeField] private float attackRadius;
+    public float attackRadius;
     [SerializeField] private float angle;
     [SerializeField] private float atkAngle;
     [SerializeField] private LayerMask layerMask;
@@ -77,7 +77,7 @@ public class ViewDetector : MonoBehaviour
             if (!targets[i].TryGetComponent(out UnitController unit))
                 continue;
 
-            if (!unit.isWait)
+            if (unit.isWait)
                 continue;
 
             Vector3 findTarget = (unit.transform.position - transform.position).normalized;
@@ -104,7 +104,7 @@ public class ViewDetector : MonoBehaviour
         {
             // 대상이 여전히 존재하고 활성화되어 있으며, 거리 안에 있다면 유지
             float dist = Vector3.Distance(transform.position, attackTarget.transform.position);
-            if (attackTarget.activeSelf && dist <= attackRadius * 2f)
+            if (attackTarget.activeSelf && dist <= attackRadius * 2)
             {
                 return; // 기존 타겟 계속 사용
             }
@@ -147,7 +147,7 @@ public class ViewDetector : MonoBehaviour
         {
             if(col.TryGetComponent(out UnitController unit))
             {
-                if(unit.isWait && unit != controller)
+                if(!unit.isWait && unit != controller)
                 {
                     allies.Add(unit);
                 }
@@ -179,7 +179,7 @@ public class ViewDetector : MonoBehaviour
                 continue;
 
             // 대기 중이 아닌(isWait) 유닛만 힐 가능
-            if (!unit.isWait)
+            if (unit.isWait)
                 continue;
 
             // 시야각 체크
@@ -282,6 +282,41 @@ public class ViewDetector : MonoBehaviour
                 m.TakeHit(skillDmg, TextType.Normal);
             }
         }
+    }
+
+    public void FindStunTarget(float stunTime)
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, radius, layerMask);
+
+        for (int i = 0; i < targets.Length; i++)
+        {
+            if (!targets[i].TryGetComponent(out MonsterController m))
+                continue;
+            m.stun = stunTime;
+            m.ChangeState(MonsterState.Stun);
+        }
+    }
+
+    public void ProvokeStart()
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, 8f, layerMask);
+
+        for (int i = 0; i < targets.Length; i++)
+        {
+            if (!targets[i].TryGetComponent(out ViewDetector v))
+                continue;
+            if (!targets[i].TryGetComponent(out MonsterController m))
+                continue;
+            v.AddTarget(gameObject);
+            m.ProvokeStart();
+            m.ChangeState(MonsterState.Walk);
+        }
+    }
+
+    public void AddTarget(GameObject gameObject)
+    {
+        target = gameObject;
+        attackTarget = gameObject;
     }
 
     private void OnDrawGizmosSelected()

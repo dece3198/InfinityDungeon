@@ -53,8 +53,9 @@ public class MonsterWalk : BaseState<MonsterController>
             Transform target = state.viewDetector.Target.transform;
             Vector3 dir = (target.position - state.transform.position).normalized;
             dir.y = 0f;
+            float distance = Vector3.Distance(target.position, state.transform.position);
             Vector3 moveVec = dir * state.speed * Time.fixedDeltaTime;
-            if (state.viewDetector.AttackTarget == null)
+            if (state.viewDetector.attackRadius < distance)
             {
                 state.rigid.MovePosition(state.rigid.position + moveVec);
             }
@@ -70,10 +71,13 @@ public class MonsterWalk : BaseState<MonsterController>
 
     public override void Update(MonsterController state)
     {
-        state.viewDetector.FindAttackTarget();
-        if(state.viewDetector.AttackTarget != null)
+        if(state.isProvoke)
         {
-            state.ChangeState(MonsterState.Attack);
+            state.viewDetector.FindAttackTarget();
+            if (state.viewDetector.AttackTarget != null)
+            {
+                state.ChangeState(MonsterState.Attack);
+            }
         }
     }
 }
@@ -82,6 +86,10 @@ public class MonsterStun : BaseState<MonsterController>
 {
     public override void Enter(MonsterController state)
     {
+        state.animator.SetBool("Move", false);
+        state.animator.SetBool("Stun", true);
+        state.StartCoroutine(StunCo(state));
+        state.stunEffect.SetActive(true);
     }
 
     public override void Exit(MonsterController state)
@@ -94,6 +102,17 @@ public class MonsterStun : BaseState<MonsterController>
 
     public override void Update(MonsterController state)
     {
+    }
+
+    private IEnumerator StunCo(MonsterController state)
+    {
+        yield return new WaitForSeconds(state.stun);
+        state.animator.SetBool("Stun", false);
+        state.stunEffect.SetActive(false);
+        if (state.monsterState == MonsterState.Stun)
+        {
+            state.ChangeState(MonsterState.Idle);
+        }
     }
 }
 
@@ -185,6 +204,8 @@ public class MonsterController : Monster, IInteraction
     public float speed;
     public float atk;
     public float atkSpeed;
+    public float stun;
+    public GameObject stunEffect;
     [SerializeField] SkinnedMeshRenderer[] renderers;
     [SerializeField] private TextManager textManager;
     [SerializeField] private Slider hpBar;
@@ -195,6 +216,8 @@ public class MonsterController : Monster, IInteraction
     public ViewDetector viewDetector;
     public Transform center;
     private StateMachine<MonsterState, MonsterController> stateMachine = new StateMachine<MonsterState, MonsterController>();
+
+    public bool isProvoke = true;
 
     private void Awake()
     {
@@ -244,11 +267,23 @@ public class MonsterController : Monster, IInteraction
         }
     }
 
+    public void ProvokeStart()
+    {
+        StartCoroutine(ProvokeCo());
+    }
+
     public void TakeHit(float damage, TextType textType)
     {
         Hp -= damage;
         textManager.ShowDamageText(damage, textType);
         StartCoroutine(HitCo());
+    }
+
+    private IEnumerator ProvokeCo()
+    {
+        isProvoke = false;
+        yield return new WaitForSeconds(3f);
+        isProvoke = true;
     }
 
     private IEnumerator HitCo()

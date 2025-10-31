@@ -258,42 +258,6 @@ public class MercenaryController : MonoBehaviour
         mercenary.RoundStats();
     }
 
-    public void OnSelect()
-    {
-        //잡을때 효과
-        orignPos = transform.position;
-    }
-
-    public void FollowMouse(Vector3 targetPos)
-    {
-        //마우스 따라가기
-        rigid.linearVelocity = Vector3.zero;
-        transform.position = Vector3.Lerp(transform.position, targetPos, 0.1f);
-    }
-
-    public void OnRelease()
-    {
-        //마우스 뗏을때
-        if (MouseController.instance.curSlot != null)
-        {
-            transform.position = MouseController.instance.curSlot.transform.position;
-            if (MouseController.instance.curSlot.slotType == UnitSlotType.Waiting)
-            {
-                gameObject.layer = 0;
-                isWait = false;
-            }
-            else
-            {
-                gameObject.layer = 7;
-                isWait = true;
-            }
-        }
-        else
-        {
-            transform.position = orignPos;
-        }
-    }
-
     public void ChangeState(MercenaryState state)
     {
         stateMachine.ChangeState(state);

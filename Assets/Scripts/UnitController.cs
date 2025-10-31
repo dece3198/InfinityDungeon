@@ -128,7 +128,7 @@ public class AssassinSkill : SkillBehaviour
         }
         yield return new WaitForSeconds(0.5f);
         unit.skill[2].Play();
-        Transform target = unit.viewDetector.AttackTarget.transform;
+        Transform target = unit.viewDetector.Target.transform;
         Vector3 dir = (target.position - unit.transform.position).normalized;
         Quaternion targetRot = Quaternion.LookRotation(dir);
         unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, targetRot, 5f);
@@ -138,7 +138,7 @@ public class AssassinSkill : SkillBehaviour
         unit.restPosition.gameObject.SetActive(true);
         unit.animator.SetTrigger("Skill_1");
         yield return new WaitForSeconds(0.5f);
-        if(unit.viewDetector.AttackTarget.TryGetComponent(out IInteraction m) && unit.viewDetector.AttackTarget != null)
+        if(unit.viewDetector.Target != null && unit.viewDetector.Target.TryGetComponent(out IInteraction m))
         {
             float skillD = unit.atk * unit.skillDmg;
             if (Random.value < unit.critRate)
@@ -153,6 +153,7 @@ public class AssassinSkill : SkillBehaviour
         unit.skill[3].Play();
         yield return new WaitForSeconds(0.5f);
         unit.gameObject.layer = 7;
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -182,20 +183,11 @@ public class LancerSkill : SkillBehaviour
         unit.animator.SetTrigger("Skill_0");
         yield return new WaitForSeconds(0.1f);
         unit.skill[1].gameObject.SetActive(true);
+        float damage = unit.atk * unit.skillDmg;
         for(int i = 0; i < 8; i++)
         {
-            if (unit.viewDetector.AttackTarget.TryGetComponent(out IInteraction target))
-            {
-                if (Random.value < unit.critRate)
-                {
-                    target.TakeHit(unit.atk * unit.critDmg, TextType.Critical);
-                }
-                else
-                {
-                    target.TakeHit(unit.atk, TextType.Normal);
-                }
-                yield return new WaitForSeconds(0.1733f);
-            }
+            unit.viewDetector.FindRangeAttack(damage, unit.critRate, unit.critDmg);
+            yield return new WaitForSeconds(0.1733f);
         }
         unit.skill[1].gameObject.SetActive(false);
     }
@@ -277,6 +269,10 @@ public class ThrowerSkill : SkillBehaviour
         unit.animator.SetTrigger("Skill_0");
         yield return new WaitForSeconds(1f);
         unit.skill[1].Play();
+        if(unit.viewDetector.AttackTarget != null)
+        {
+            unit.skill[1].transform.DOMove(unit.viewDetector.AttackTarget.transform.position + Vector3.up * 20f, 0.5f).SetEase(Ease.Linear);
+        }
         yield return new WaitForSeconds(1f);
         unit.viewDetector.FindAttackTarget();
         if (unit.viewDetector.AttackTarget != null)
@@ -299,7 +295,16 @@ public class TankerSkill : SkillBehaviour
 {
     public override IEnumerator Skill(UnitController unit)
     {
-        yield return null;
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(0.5f);
+        unit.viewDetector.ProvokeStart();
+        unit.skill[1].Play();
+        unit.skill[2].gameObject.SetActive(true);
+        float orignDef = unit.def;
+        unit.def *= 2;
+        yield return new WaitForSeconds(10);
+        unit.def = orignDef;
+        unit.skill[2].gameObject.SetActive(false);
     }
 }
 
@@ -307,7 +312,16 @@ public class FocusWizardSkill : SkillBehaviour
 {
     public override IEnumerator Skill(UnitController unit)
     {
-        yield return null;
+        unit.animator.SetTrigger("Skill_0");
+        unit.skill[3].gameObject.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        unit.skillPos.position = unit.viewDetector.AttackTarget.transform.position + Vector3.up * 40f;
+        if(unit.skillPos.TryGetComponent(out Arrow s) && unit.viewDetector.AttackTarget.TryGetComponent(out MonsterController m))
+        {
+            s.SetTarget(unit, m, unit.skill[2]);
+            s.gameObject.SetActive(true);
+        }
+        unit.skill[3].gameObject.SetActive(false);
     }
 }
 
@@ -315,7 +329,16 @@ public class AreaWizardSkill : SkillBehaviour
 {
     public override IEnumerator Skill(UnitController unit)
     {
-        yield return null;
+        unit.animator.SetTrigger("Skill_0");
+        unit.skill[2].gameObject.SetActive(true);
+        yield return new WaitForSeconds(1.5f);
+        unit.skill[3].transform.position = unit.viewDetector.AttackTarget.transform.position;
+        unit.skill[3].Play();
+        if (unit.skill[3].TryGetComponent(out ViewDetector v))
+        {
+            v.FindStunTarget(3.5f);
+        }
+        unit.skill[2].gameObject.SetActive(false);
     }
 }
 
@@ -324,7 +347,10 @@ public class UnitIdle : BaseState<UnitController>
     public override void Enter(UnitController state)
     {
         state.animator.SetBool("Move", false);
-        state.rigid.linearVelocity = Vector3.zero;
+        if(!state.rigid.isKinematic)
+        {
+            state.rigid.linearVelocity = Vector3.zero;
+        }
     }
 
     public override void Exit(UnitController state)
@@ -337,7 +363,7 @@ public class UnitIdle : BaseState<UnitController>
 
     public override void Update(UnitController state)
     {
-        if (StageManager.instance.isStage && state.isWait)
+        if (StageManager.instance.isStage && !state.isWait)
         {
             if(state.mercenary.mercenaryClass == MercenaryClass.Healer)
             {
@@ -361,6 +387,7 @@ public class UnitWalk : BaseState<UnitController>
     public override void Enter(UnitController state)
     {
         state.animator.SetBool("Move", true);
+        state.rigid.isKinematic = false;
     }
 
     public override void Exit(UnitController state)
@@ -445,6 +472,8 @@ public class UnitAttack : BaseState<UnitController>
                 case MercenaryClass.Hunter: state.StartCoroutine(PlayBowAnimation(state)); break;
                 case MercenaryClass.Warrior: state.StartCoroutine(WarriorAtkCo(state)); break;
                 case MercenaryClass.Thrower: state.StartCoroutine(PlayBowAnimation(state)); break;
+                case MercenaryClass.FocusWizard: state.StartCoroutine(WizardAttackCo(state)); break;
+                case MercenaryClass.AreaWizard: state.StartCoroutine(WizardAttackCo(state)); break;
             }
         }
         else
@@ -470,7 +499,15 @@ public class UnitAttack : BaseState<UnitController>
     {
         yield return new WaitForSeconds(0.49f);
         state.Mp += 10;
-        state.ExitArrow();
+        state.ExitArrow(state.skill[0]);
+    }
+
+    private IEnumerator WizardAttackCo(UnitController state)
+    {
+        yield return new WaitForSeconds(0.5f);
+        state.skill[1].Play();
+        state.Mp += 10;
+        state.ExitArrow(state.skill[0]);
     }
 
     private IEnumerator Healing(UnitController state)
@@ -630,7 +667,8 @@ public class UnitController : MonoBehaviour
     [SerializeField] private Transform center;
     private StateMachine<UnitState, UnitController> stateMachine = new StateMachine<UnitState, UnitController>();
     public GameObject shieldObj;
-
+    public UnitSlot unitSlot;
+    public UnitSlot tempSlot;
     public Vector3 orignPos;
     private SkillBehaviour skillBehaviour;
 
@@ -757,6 +795,7 @@ public class UnitController : MonoBehaviour
 
     public void OnSelect()
     {
+        rigid.isKinematic = false;
         //잡을때 효과
         isSelect = true;
         orignPos = transform.position;
@@ -770,25 +809,77 @@ public class UnitController : MonoBehaviour
 
     public void OnRelease()
     {
-        if(MouseController.instance.curSlot != null)
+        rigid.isKinematic = true;
+
+        UnitController other = unitSlot.controller;
+
+        bool isLevel = DungeonManager.instance.LevelIndex >= DungeonManager.instance.level;
+
+        bool isWaitingSlot = unitSlot.slotType == UnitSlotType.Waiting;
+
+        if (isLevel && !isWaitingSlot && other == null)
         {
-            transform.position = MouseController.instance.curSlot.transform.position;
-            if(MouseController.instance.curSlot.slotType == UnitSlotType.Waiting)
+            transform.position = orignPos;
+            isSelect = false;
+            if (unitSlot != null)
+                unitSlot.check.SetActive(false);
+            return;
+        }
+
+        if (other != null)
+        {
+            UnitSlot targetSlot = unitSlot;
+            bool tempWait = other.isWait;
+
+            other.transform.position = orignPos;
+            transform.position = targetSlot.transform.position; 
+
+            other.isWait = isWait;
+            isWait = tempWait;
+
+            tempSlot.controller = other;
+            targetSlot.controller = this;
+
+            other.tempSlot = tempSlot;
+            tempSlot = unitSlot;
+        }
+        else
+        {
+            transform.position = unitSlot.transform.position;
+            unitSlot.controller = this;
+            
+            if(tempSlot != null)
+            {
+                tempSlot.controller = null;
+            }
+
+            tempSlot = unitSlot;
+
+            if (unitSlot.slotType == UnitSlotType.Waiting)
             {
                 gameObject.layer = 0;
-                isWait = false;
+                if (!isWait)
+                {
+                    isWait = true;
+                    DungeonManager.instance.LevelIndex--;
+                }
             }
             else
             {
                 gameObject.layer = 7;
-                isWait = true;
+                if (isWait)
+                {
+                    isWait = false;
+                    DungeonManager.instance.LevelIndex++;
+                }
             }
         }
-        else
-        {
-            transform.position = orignPos;
-        }
+
         isSelect = false;
+        if(unitSlot != null)
+        {
+            unitSlot.check.SetActive(false);
+        }
     }
 
     public void Attack()
@@ -811,7 +902,7 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    public void ExitArrow()
+    public void ExitArrow(ParticleSystem effect)
     {
         viewDetector.FindAttackTarget();
         if (viewDetector.AttackTarget != null)
@@ -819,7 +910,7 @@ public class UnitController : MonoBehaviour
             GameObject arrow = arrowStack.Pop();
             arrow.transform.position = band.position;
             MonsterController targetCtrl = viewDetector.AttackTarget.GetComponent<MonsterController>();
-            arrow.GetComponent<Arrow>().SetTarget(this, targetCtrl);
+            arrow.GetComponent<Arrow>().SetTarget(this, targetCtrl, effect);
             arrow.SetActive(true);
             arrow.transform.SetParent(null);
         }

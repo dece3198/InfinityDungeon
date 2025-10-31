@@ -9,8 +9,8 @@ public enum UnitSlotType
 public class MouseController : Singleton<MouseController>
 {
     [SerializeField] private GameObject grid;
+    [SerializeField] private GameObject gridRed;
     [SerializeField] private GameObject selectEffect;
-    public UnitSlot curSlot;
     public UnitController selectedUnit;
     private Camera cam;
 
@@ -34,6 +34,10 @@ public class MouseController : Singleton<MouseController>
                 {
                     selectedUnit = unit;
                     grid.SetActive(true);
+                    if(DungeonManager.instance.LevelIndex >= DungeonManager.instance.level)
+                    {
+                        gridRed.SetActive(true);
+                    }
                     selectEffect.SetActive(true);
                     selectEffect.transform.parent = unit.transform;
                     selectEffect.transform.localPosition = Vector3.zero;
@@ -60,6 +64,7 @@ public class MouseController : Singleton<MouseController>
             if (selectedUnit != null)
             {
                 grid.SetActive(false);
+                gridRed.SetActive(false);
                 selectEffect.SetActive(false);
                 selectedUnit.OnRelease();
                 selectedUnit = null;

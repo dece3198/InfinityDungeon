@@ -1,16 +1,24 @@
 using UnityEngine;
 
+public enum BulletType
+{
+    Arrow, Magic
+}
+
 public class Arrow : MonoBehaviour
 {
     private UnitController unit;
     private MonsterController target;
     [SerializeField] private float speed;
+    private ParticleSystem effect;
     private bool isActive;
+    [SerializeField] private BulletType bulletType;
 
-    public void SetTarget( UnitController u, MonsterController t)
+    public void SetTarget( UnitController u, MonsterController t, ParticleSystem _effect)
     {
         unit = u;
         target = t;
+        effect = _effect;
         isActive = true;
     }
 
@@ -33,18 +41,36 @@ public class Arrow : MonoBehaviour
         MonsterController monster = other.GetComponent<MonsterController>();
         if (monster != null && monster == target)
         {
-            unit.skill[0].transform.position = monster.transform.position + Vector3.up * 2;
-            unit.skill[0].Play();
-            if (Random.value < unit.critRate)
+            float damage;
+
+            if (bulletType == BulletType.Arrow)
             {
-                other.GetComponent<IInteraction>().TakeHit(unit.atk * unit.critDmg, TextType.Critical);
+                effect.transform.position = monster.transform.position + Vector3.up * 2;
+                damage = unit.atk;
             }
             else
             {
-                other.GetComponent<IInteraction>().TakeHit(unit.atk, TextType.Normal);
+                effect.transform.position = monster.transform.position;
+                damage = unit.atk * unit.skillDmg;
+            }
+            effect.Play();
+            if (Random.value < unit.critRate)
+            {
+                other.GetComponent<IInteraction>().TakeHit(damage * unit.critDmg, TextType.Critical);
+            }
+            else
+            {
+                other.GetComponent<IInteraction>().TakeHit(damage, TextType.Normal);
             }
 
-            unit.EnterArrow(gameObject);
+            if(bulletType == BulletType.Arrow)
+            {
+                unit.EnterArrow(gameObject);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }

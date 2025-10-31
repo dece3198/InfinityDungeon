@@ -64,6 +64,7 @@ public class StageManager : Singleton<StageManager>
         startText.transform.DOScale(Vector3.one, 0.5f);
         yield return new WaitForSeconds(1f);
         startText.gameObject.SetActive(false);
+        DungeonManager.instance.GameStart();
         isStage = true;
     }
 }
