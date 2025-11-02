@@ -15,7 +15,7 @@ public class DungeonManager : Singleton<DungeonManager>
         }
     }
     public int level;
-    [SerializeField] private List<GameObject> curUnits = new List<GameObject>();
+    public List<GameObject> curUnits = new List<GameObject>();
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private UnitSlot[] waitSlot;
 
@@ -23,14 +23,24 @@ public class DungeonManager : Singleton<DungeonManager>
     {
         level = 3;
         LevelIndex = 0;
-        /*
         for(int i = 0; i < GameManager.instance.mercenaryList.Count; i++)
         {
             GameObject unit = Instantiate(GameManager.instance.mercenaryList[i].unitPrefab);
-            curUnits.Add(unit);
+            AddCard(unit);
             AddUnit(unit.GetComponent<UnitController>());
         }
-        */
+    }
+
+    private void AddCard(GameObject unit)
+    {
+        curUnits.Add(unit);
+        if(unit.TryGetComponent(out UnitController controller))
+        {
+            foreach(var card in controller.mercenary.cards)
+            {
+                CardManager.instance.cards.Add(card);
+            }
+        }
     }
     
     public void GameStart()

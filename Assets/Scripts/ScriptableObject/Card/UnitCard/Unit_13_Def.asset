@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5ed5b4ac55a2354faf043ef8ba23f70, type: 3}
+  m_Name: Unit_13_Def
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Defense Up
+  unitImage: {fileID: 21300000, guid: 261ddbe6938a8294eb193a6b5ce63d5d, type: 3}
+  typeImage: {fileID: -1582436372, guid: 2bad8d8a766c2894faf6097f008ea017, type: 3}
+  level: 0
+  value: 0
+  cardType: 1
+  cardRank: 0
+  mercenary: {fileID: 11400000, guid: 3797bcd48d11bda49ac17159289d25cb, type: 2}

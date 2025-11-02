@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5ed5b4ac55a2354faf043ef8ba23f70, type: 3}
+  m_Name: Unit_11_Hp
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Hp Up
+  unitImage: {fileID: 21300000, guid: c624dba1fd40dd04bacac4a123f0ed44, type: 3}
+  typeImage: {fileID: 21300000, guid: e7b66ea0eeefe564d99283044651d0f5, type: 3}
+  level: 0
+  value: 0
+  cardType: 2
+  cardRank: 0
+  mercenary: {fileID: 11400000, guid: da6477e59417c8d45b0d2069cfb24d21, type: 2}

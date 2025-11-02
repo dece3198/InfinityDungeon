@@ -35,4 +35,8 @@ MonoBehaviour:
   isCoatingImageFake: 0
   isInsigniaFake: 0
   insignia: {fileID: 11400000, guid: 0b689684919a32c4bbe15c9ebc84b050, type: 2}
+  cards:
+  - {fileID: 11400000, guid: cbc115ceb79f05442b6105cf8b577af2, type: 2}
+  - {fileID: 11400000, guid: f0186604fd9266049aa581d515c00a4c, type: 2}
+  - {fileID: 11400000, guid: 4f769ceb5a7e0304fb2c68a205d67547, type: 2}
   unitPrefab: {fileID: 8640754660151346346, guid: 9f1132bcede95374280247472e30d402, type: 3}

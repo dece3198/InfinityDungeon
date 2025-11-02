@@ -42,7 +42,7 @@ public class Mercenary : ScriptableObject
     public bool isInsigniaFake;
 
     public Insignia insignia;
-
+    public Card[] cards;
     public GameObject unitPrefab;
 
     public void CalculateStats()
