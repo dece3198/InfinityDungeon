@@ -1,6 +1,13 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
+public enum UpGradeType
+{
+    Atk, Def, Hp
+}
 
 public class DungeonManager : Singleton<DungeonManager>
 {
@@ -10,25 +17,67 @@ public class DungeonManager : Singleton<DungeonManager>
         get { return levelIndex; }
         set 
         { 
-            levelIndex = value; 
-            levelText.text = levelIndex.ToString() + " / " + level.ToString();
+            levelIndex = value;
+            levelIndexText.text = levelIndex.ToString() + " / " + Level.ToString();
         }
     }
-    public int level;
+    [SerializeField] private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            level = value;
+            levelText.text = "Lv" + level.ToString();
+        }
+    }
+    [SerializeField] private float exp;
+    public float Exp
+    {
+        get { return exp; }
+        set 
+        { 
+            exp = value;
+            if(exp >= 100)
+            {
+                exp -= 100;
+                Level++;
+                levelIndexText.text = LevelIndex.ToString() + " / " + Level.ToString();
+            }
+            expBar.value = Mathf.Clamp01(exp / 100f);
+        }
+    }
+    [SerializeField] private int gold;
+    public int Gold
+    {
+        get { return gold; }
+        set
+        {
+            gold = value;
+            goldText.text = gold.ToString() + "G";
+        }
+    }
     public List<GameObject> curUnits = new List<GameObject>();
+    [SerializeField] private TextMeshProUGUI levelIndexText;
     [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private Slider expBar;
     [SerializeField] private UnitSlot[] waitSlot;
+    [SerializeField] private Material fadeInOut;
 
     private void Start()
     {
-        level = 3;
+        Level = 3;
         LevelIndex = 0;
+        Gold = 50;
         for(int i = 0; i < GameManager.instance.mercenaryList.Count; i++)
         {
             GameObject unit = Instantiate(GameManager.instance.mercenaryList[i].unitPrefab);
             AddCard(unit);
             AddUnit(unit.GetComponent<UnitController>());
         }
+
+        StartCoroutine(FadeOut());
     }
 
     private void AddCard(GameObject unit)
@@ -39,6 +88,55 @@ public class DungeonManager : Singleton<DungeonManager>
             foreach(var card in controller.mercenary.cards)
             {
                 CardManager.instance.cards.Add(card);
+            }
+        }
+    }
+
+    public void UpGradeUnit(Card card, UpGradeType type)
+    {
+        if(type == UpGradeType.Atk)
+        {
+            for(int i = 0; i < curUnits.Count; i++)
+            {
+                if (curUnits[i].TryGetComponent(out UnitController controller))
+                {
+                    if (card.mercenary == controller.mercenary)
+                    {
+                        switch (type)
+                        {
+                            case UpGradeType.Atk: controller.mercenary.atk += card.value; break;
+                            case UpGradeType.Def: controller.mercenary.def += card.value; break;
+                            case UpGradeType.Hp: controller.mercenary.hp += card.value; break;
+                        }
+                        if (controller.gameObject.activeInHierarchy)
+                        {
+                            controller.upEffect.Play();
+                        }
+                        controller.AddStats();
+                    }
+                }
+            }
+        }
+    }
+
+    public void AllUnitUpGrade(Card card, UpGradeType type)
+    {
+        for(int i = 0; i < curUnits.Count; i++)
+        {
+            if (curUnits[i].TryGetComponent(out UnitController controller))
+            {
+                switch (type)
+                {
+                    case UpGradeType.Atk:
+                        controller.mercenary.atk += card.value; break;
+                    case UpGradeType.Def: controller.mercenary.def += card.value; break;
+                    case UpGradeType.Hp: controller.mercenary.hp += card.value; break;
+                }
+                if (controller.gameObject.activeInHierarchy)
+                {
+                    controller.upEffect.Play();
+                }
+                controller.AddStats();
             }
         }
     }
@@ -63,6 +161,28 @@ public class DungeonManager : Singleton<DungeonManager>
                 waitSlot[i].AddUnit(unit);
                 return;
             }
+        }
+    }
+
+    private IEnumerator FadeOut()
+    {
+        float time = 0f;
+        while (time < 1f)
+        {
+            time += Time.deltaTime;
+            fadeInOut.SetFloat("_Fade", time);
+            yield return null;
+        }
+    }
+
+    private IEnumerator FadeIn()
+    {
+        float time = 1f;
+        while (time > 0f)
+        {
+            time -= Time.deltaTime;
+            fadeInOut.SetFloat("_Fade", time);
+            yield return null;
         }
     }
 }

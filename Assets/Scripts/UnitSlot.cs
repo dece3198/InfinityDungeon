@@ -33,6 +33,8 @@ public class UnitSlot : MonoBehaviour
     {
         unit.transform.position = transform.position;
         unit.gameObject.SetActive(true);
+        unit.tempSlot = this;
+        unit.isWait = true;
         controller = unit;
     }
 

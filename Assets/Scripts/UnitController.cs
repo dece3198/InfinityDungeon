@@ -14,7 +14,7 @@ public abstract class SkillBehaviour
     public abstract IEnumerator Skill(UnitController unit);
 }
 
-public class SwordManSkill : SkillBehaviour
+public class SwordsWomanSkill : SkillBehaviour
 {
     public override IEnumerator Skill(UnitController unit)
     {
@@ -658,6 +658,7 @@ public class UnitController : MonoBehaviour
     [SerializeField] private Slider shieldBar;
     public Transform skillPos;
     public ParticleSystem[] skill;
+    public ParticleSystem upEffect;
     [SerializeField] private GameObject arrowtPrefab;
     private Stack<GameObject> arrowStack = new Stack<GameObject> ();
     public Transform band;
@@ -695,7 +696,7 @@ public class UnitController : MonoBehaviour
 
         switch (mercenary.mercenaryClass)
         {
-            case MercenaryClass.SwordMan: skillBehaviour = new SwordManSkill(); break;
+            case MercenaryClass.SwordsWoman: skillBehaviour = new SwordsWomanSkill(); break;
             case MercenaryClass.Shielder: skillBehaviour = new ShielderSkill(); break;
             case MercenaryClass.Archer: skillBehaviour = new ArcherSkill(); break;
             case MercenaryClass.Healer: skillBehaviour = new HealerSkill(); break;
@@ -747,6 +748,15 @@ public class UnitController : MonoBehaviour
     public void FixedUpdate()
     {
         stateMachine.FixedUpdate();
+    }
+
+    public void AddStats()
+    {
+        atk = mercenary.atk;
+        atkSpeed = mercenary.atkSpeed;
+        def = mercenary.def;
+        Hp = mercenary.hp;
+        maxHp = Hp;
     }
 
     public void TakeHit(float damage)
@@ -813,7 +823,7 @@ public class UnitController : MonoBehaviour
 
         UnitController other = unitSlot.controller;
 
-        bool isLevel = DungeonManager.instance.LevelIndex >= DungeonManager.instance.level;
+        bool isLevel = DungeonManager.instance.LevelIndex >= DungeonManager.instance.Level;
 
         bool isWaitingSlot = unitSlot.slotType == UnitSlotType.Waiting;
 

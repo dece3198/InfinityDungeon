@@ -1157,6 +1157,109 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8171258359613368428, guid: a5153781e16022748bc60b9022f14c70, type: 3}
   m_PrefabInstance: {fileID: 77821615296506732}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1848557037037129301
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6600359656574636610}
+    m_Modifications:
+    - target: {fileID: 8099888392619715881, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100172936991520497, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100633617745032417, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100710699504020627, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8101349743509013545, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8101410542876203641, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8263428832195714075, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_Name
+      value: SpawnSimpleBlue
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.70710653
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071071
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+--- !u!198 &7624308890485209252 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8100172936991520497, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+  m_PrefabInstance: {fileID: 1848557037037129301}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7718236103794859272 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8267423655888950109, guid: a96dad5c46057fa41a6581f9d89465ca, type: 3}
+  m_PrefabInstance: {fileID: 1848557037037129301}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1987009868939184980
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2729,6 +2832,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 39c76486398f88d458e5008513896cba, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8102642547256083200}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 39c76486398f88d458e5008513896cba, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7718236103794859272}
     - targetCorrespondingSourceObject: {fileID: -4310770610479270847, guid: 39c76486398f88d458e5008513896cba, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2024930500445842623}
@@ -2870,6 +2976,7 @@ MonoBehaviour:
   - {fileID: 5015559217774815678}
   - {fileID: 6431907923126933203}
   - {fileID: 3632894420021293011}
+  upEffect: {fileID: 7624308890485209252}
   arrowtPrefab: {fileID: 5639763309395215668, guid: 3c38f2547b58b624f9e9831826601f50, type: 3}
   band: {fileID: 664292911904253022}
   restPosition: {fileID: 0}
@@ -2877,6 +2984,8 @@ MonoBehaviour:
   textManager: {fileID: 1002863246576291817}
   center: {fileID: 4184230820505720219}
   shieldObj: {fileID: 0}
+  unitSlot: {fileID: 0}
+  tempSlot: {fileID: 0}
   orignPos: {x: 0, y: 0, z: 0}
   isMan: 0
   isWait: 0

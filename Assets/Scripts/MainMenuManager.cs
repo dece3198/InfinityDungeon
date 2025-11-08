@@ -7,12 +7,11 @@ public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] private GameObject subCam;
     [SerializeField] private Animator[] StartAni;
-    [SerializeField] private RectTransform fadeInOut;
+    [SerializeField] private Material fadeInOut;
 
     private void Awake()
     {
-        fadeInOut.sizeDelta = new Vector2(5000, 5000);
-        fadeInOut.gameObject.SetActive(false);
+        fadeInOut.SetFloat("_Fade", 1f);
     }
 
     public void StartButton()
@@ -32,10 +31,14 @@ public class MainMenuManager : MonoBehaviour
         StartAni[2].SetTrigger("Open");
         yield return new WaitForSeconds(1f);
         subCam.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        fadeInOut.gameObject.SetActive(true);
-        fadeInOut.DOSizeDelta(Vector2.zero, 1f);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.5f);
+        float time = 1f;
+        while (time > 0f)
+        {
+            time -= Time.deltaTime;
+            fadeInOut.SetFloat("_Fade", time);
+            yield return null;
+        }
         AsyncOperation op = SceneManager.LoadSceneAsync("LobbyScene");
         op.allowSceneActivation = false;
         while(op.progress < 0.9f)

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
     public Card card;
     [SerializeField] private Image rankImage;
@@ -15,9 +15,10 @@ public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] private TextMeshProUGUI levelText2;
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI valueText;
+    [SerializeField] private Transform legendCard;
     private Vector3 orignScale;
-    private bool isSelect = true;
-    private bool isFlip = false;
+    private bool isSelect = false;
+    public bool isFlip = false;
 
     private void Awake()
     {
@@ -36,12 +37,19 @@ public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             .SetEase(Ease.OutQuad)
             .OnComplete(() =>
             {
-                transform.DORotate(new Vector3(0, isFlip ? 0f : 180f, 0), 0.3f)
+                transform.DOLocalRotate(new Vector3(0, isFlip ? 0f : 180f, 0), 0.3f)
                     .SetEase(Ease.InOutSine)
                     .OnComplete(() =>
                     {
+                        isFlip = true;
                         transform.DOScale(orignScale, 0.25f)
                             .SetEase(Ease.OutBack);
+                        if(card.cardRank == CardRank.Legend)
+                        {
+                            legendCard.gameObject.SetActive(true);
+                            legendCard.DOScale(Vector3.one, 0.25f).SetEase(Ease.OutBack);
+                            
+                        }
                     });
             });
         yield return new WaitForSeconds(0.8f);
@@ -71,6 +79,15 @@ public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         nameText.text = card.cardName;
     }
 
+    public void ClearCard()
+    {
+        card = null;
+        isFlip = false;
+        legendCard.gameObject.SetActive(false);
+        legendCard.localScale = Vector3.zero;
+        transform.localEulerAngles = Vector3.zero;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if(isSelect)
@@ -85,5 +102,22 @@ public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             transform.DOScale(orignScale, 0.25f).SetEase(Ease.OutQuad);
         }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if(isSelect)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                transform.DOScale(orignScale, 0.25f).SetEase(Ease.OutQuad);
+                CardManager.instance.SelectCard(this);
+            }
+        }
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+
     }
 }

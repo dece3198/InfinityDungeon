@@ -34,7 +34,7 @@ public class MouseController : Singleton<MouseController>
                 {
                     selectedUnit = unit;
                     grid.SetActive(true);
-                    if(DungeonManager.instance.LevelIndex >= DungeonManager.instance.level)
+                    if(DungeonManager.instance.LevelIndex >= DungeonManager.instance.Level)
                     {
                         gridRed.SetActive(true);
                     }

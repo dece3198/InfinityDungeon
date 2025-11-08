@@ -83,7 +83,7 @@ public class LobbyManager : Singleton<LobbyManager>
     [Header("Game Display")]
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private TextMeshProUGUI recruiText;
-    [SerializeField] private RectTransform fadeInOut;
+    [SerializeField] private Material fadeInOut;
 
     [Header("Game State")]
     public Transform[] roads;
@@ -117,13 +117,7 @@ public class LobbyManager : Singleton<LobbyManager>
         Gold += 500;
         RecruitmentIndex = 0;
         orignPos = new Vector2(5000, 5000);
-        fadeInOut.sizeDelta = Vector2.zero;
-
-        for(int i = 0; i < randerUi.Length; i++)
-        {
-            randerUi[i].gameObject.SetActive(false);
-        }
-        fadeInOut.DOSizeDelta(orignPos, 1f);
+        StartCoroutine(FadeOut());
     }
 
     //종이 세팅
@@ -233,7 +227,7 @@ public class LobbyManager : Singleton<LobbyManager>
 
     public void DungeonButton()
     {
-        StartCoroutine(FadeIn());
+        StartCoroutine(DungeonEntry());
     }
 
     //용병 영입 코루틴
@@ -256,17 +250,38 @@ public class LobbyManager : Singleton<LobbyManager>
     //FadeOut
     private IEnumerator FadeOut()
     {
-        fadeInOut.gameObject.SetActive(true);
-        fadeInOut.DOSizeDelta(orignPos, 1f);
-        yield return new WaitForSeconds(1f);
+        float time = 0f;
+        while(time < 1f)
+        {
+            time += Time.deltaTime;
+            fadeInOut.SetFloat("_Fade", time);
+            yield return null;
+        }
     }
 
     private IEnumerator FadeIn()
     {
-        fadeInOut.DOSizeDelta(Vector2.zero, 1f);
-        yield return new WaitForSeconds(1.5f);
+        float time = 1f;
+        while (time > 0f)
+        {
+            time -= Time.deltaTime;
+            fadeInOut.SetFloat("_Fade", time);
+            yield return null;
+        }
+    }
+
+    private IEnumerator DungeonEntry()
+    {
+        float time = 1f;
+        while (time > 0f)
+        {
+            time -= Time.deltaTime;
+            fadeInOut.SetFloat("_Fade", time);
+            yield return null;
+        }
         AsyncOperation op = SceneManager.LoadSceneAsync("DungeonScene");
     }
+
 
     private IEnumerator RecruitAllMercenariesCo()
     {

@@ -7,7 +7,7 @@ public enum Rank
 
 public enum MercenaryClass
 {
-    SwordMan, Shielder, Archer, FocusWizard, Assassin, Mauler, Lancer, Berserker, Hunter, Warrior, Thrower, Tanker, Healer, AreaWizard
+    SwordsWoman, Shielder, Archer, FocusWizard, Assassin, Mauler, Lancer, Berserker, Hunter, Warrior, Thrower, Tanker, Healer, AreaWizard
 }
 
 [CreateAssetMenu(fileName = "New Mercenary", menuName = "New Mercenary/Mercenary")]
@@ -57,7 +57,7 @@ public class Mercenary : ScriptableObject
 
         switch (mercenaryClass)
         {
-            case MercenaryClass.SwordMan :
+            case MercenaryClass.SwordsWoman:
                 atk = 23f; atkSpeed = 1.5f; def = 15; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.25f; criticalDamage = 2f;
                 break;
             case MercenaryClass.Shielder:
@@ -144,7 +144,7 @@ public class Mercenary : ScriptableObject
     {
         switch (mercenaryClass)
         {
-            case MercenaryClass.SwordMan: return (23f, 1.5f, 15f, 100f, 1f, 0.25f, 2f, 4f);
+            case MercenaryClass.SwordsWoman: return (23f, 1.5f, 15f, 100f, 1f, 0.25f, 2f, 4f);
             case MercenaryClass.Shielder: return (10f, 2f, 25f, 200f, 1f, 0.25f, 2f, 20f);
             case MercenaryClass.Archer: return (10f, 1.5f, 10f, 50f, 2f, 0.5f, 2f, 5f);
             case MercenaryClass.FocusWizard: return (5f, 2f, 10f, 50f, 1f, 0.1f, 2f, 30f);
