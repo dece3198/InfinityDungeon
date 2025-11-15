@@ -5,7 +5,7 @@ using TMPro;
 
 public enum UseType
 {
-    MonsterAtk, MonsterDef, MonsterSpeed, MonsterStun, UnitAtk, UnitDef, UnitHp, UnitSpeed
+    MonsterAtk, MonsterDef, MonsterSpeed, MonsterStun, UnitAtk, UnitDef, UnitHp, TankerBot, SubTankerBot, ADBot
 }
 
 public static class UseCardGenerator
@@ -22,12 +22,45 @@ public static class UseCardGenerator
 
         switch (card.cardRank)
         {
-            case CardRank.Silver: card.level = Random.Range(1, 15); break;
-            case CardRank.Gold: card.level = Random.Range(15, 30); break;
-            case CardRank.Eapic: card.level = Random.Range(30, 60); break;
-            case CardRank.Legend: card.level = Random.Range(60, 99); break;
+            case CardRank.Silver: card.level = Random.Range(1, 16); break;
+            case CardRank.Gold: card.level = Random.Range(16, 31); break;
+            case CardRank.Eapic: card.level = Random.Range(31, 61); break;
+            case CardRank.Legend: card.level = Random.Range(61, 100); break;
         }
 
+    }
+
+    public static void CreateRandomBotCard(UseCard card)
+    {
+        card.mercenary.CalculateStats();
+        switch (card.mercenary.mercenaryRank)
+        {
+            case Rank.F: card.level = Random.Range(1, 16); break;
+            case Rank.E: card.level = Random.Range(16, 31); ; break;
+            case Rank.D: card.level = Random.Range(31, 46); ; break;
+            case Rank.C: card.level = Random.Range(46, 61); ; break;
+            case Rank.B: card.level = Random.Range(61, 76); ; break;
+            case Rank.A: card.level = Random.Range(76, 91); ; break;
+            case Rank.S: card.level = Random.Range(91, 100); ; break;
+        }
+
+        if (card.level < 30f) card.cardRank = CardRank.Silver;
+        else if (card.level < 60f) card.cardRank = CardRank.Gold;
+        else if (card.level < 90f) card.cardRank = CardRank.Eapic;
+        else card.cardRank = CardRank.Legend;
+
+        if(card.useType == UseType.TankerBot)
+        {
+            card.mercenary.atk = card.level * 0.2f + StageManager.instance.stageIndex * 3f;
+            card.mercenary.def = card.level * 0.2f + StageManager.instance.stageIndex;
+            card.mercenary.hp = card.level * 10 + StageManager.instance.stageIndex * 15f;
+        }
+        else if(card.useType == UseType.SubTankerBot)
+        {
+            card.mercenary.atk = card.level * 0.4f + StageManager.instance.stageIndex * 5f;
+            card.mercenary.def = card.level * 0.1f + StageManager.instance.stageIndex;
+            card.mercenary.hp = card.level * 5 + StageManager.instance.stageIndex * 10f;
+        }
     }
 }
 
@@ -44,8 +77,64 @@ public class CardSlotManager : Singleton<CardSlotManager>
     [SerializeField] private GameObject discardButton;
     [SerializeField] private RectTransform curCard;
     [SerializeField] private TextMeshProUGUI errorText;
+    [SerializeField] private UseCardSlot centerCard;
+    public ParticleSystem useEffect;
+    public UseCardSlot selectCard;
     public Transform useButton;
     public Transform deleteButton;
+
+    public void UseCard()
+    {
+        if(selectCard == null) return;
+
+        useButton.gameObject.SetActive(false);
+        deleteButton.gameObject.SetActive(false);
+        selectCard.transform.DOScale(Vector3.one * 1.5f, 0.5f).SetEase(Ease.OutBack);
+        selectCard.transform.DOMove(centerPos.position, 0.5f).SetEase(Ease.OutCubic).OnComplete(() =>
+        {
+            centerCard.AddCard(selectCard.card, rankImage[(int)selectCard.card.cardRank]);
+            centerCard.gameObject.SetActive(true);
+            StartCoroutine(centerCard.DissolveCo());
+            cardList.Remove(selectCard.GetComponent<RectTransform>());
+            selectCard.ClearCard();
+            selectCard = null;
+            RefreshCards();
+            switch (centerCard.card.useType)
+            {
+                case UseType.MonsterAtk : StageManager.instance.DeBuffMonster(centerCard.card); break;
+                case UseType.MonsterDef: StageManager.instance.DeBuffMonster(centerCard.card); break;
+                case UseType.MonsterSpeed: StageManager.instance.DeBuffMonster(centerCard.card); break;
+                case UseType.MonsterStun: StageManager.instance.DeBuffMonster(centerCard.card); break;
+                case UseType.UnitAtk: DungeonManager.instance.RandomUnitUpGrade(centerCard.card);break;
+                case UseType.UnitDef: DungeonManager.instance.RandomUnitUpGrade(centerCard.card); break;
+                case UseType.UnitHp: DungeonManager.instance.RandomUnitUpGrade(centerCard.card); break;
+                case UseType.TankerBot:BotGenerator(); break;
+                case UseType.SubTankerBot: BotGenerator(); break;
+            }
+        });
+        
+    }
+
+    private void BotGenerator()
+    {
+        if (centerCard.card.cardRank == CardRank.Legend)
+        {
+            GameObject unit = Instantiate(centerCard.card.LegendPrefab);
+            if (unit.TryGetComponent(out UnitController controller))
+            {
+                DungeonManager.instance.AddUnit(controller);
+            }
+
+        }
+        else
+        {
+            GameObject unit = Instantiate(centerCard.card.botPrefab);
+            if (unit.TryGetComponent(out UnitController controller))
+            {
+                DungeonManager.instance.AddUnit(controller);
+            }
+        }
+    }
 
     public void TakeCardButton()
     {
@@ -88,6 +177,43 @@ public class CardSlotManager : Singleton<CardSlotManager>
 
             errorText.DOFade(1f, 1f).OnComplete(() => errorText.DOFade(0f, 0.4f));
         }
+    }
+
+    public void DiscardCard()
+    {
+        if (selectCard == null) return;
+
+        useButton.gameObject.SetActive(false);
+        deleteButton.gameObject.SetActive(false);
+        selectCard.DOKill();
+        selectCard.transform.SetAsLastSibling();
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(
+            selectCard.transform.DOScale(Vector3.one * 1.15f, 0.15f)
+            .SetEase(Ease.OutQuad)
+        );
+
+        seq.Append(
+            selectCard.transform.DOMove(discardPos.position, 0.6f)
+            .SetEase(Ease.InQuad)
+        );
+
+        seq.Join(
+            selectCard.transform.DOLocalRotate(
+                new Vector3(0, 0, Random.Range(-1440f, 1440f)),
+                0.6f,
+                RotateMode.FastBeyond360
+            ).SetEase(Ease.Linear)
+        );
+
+        seq.OnComplete(() =>
+        {
+            selectCard.ClearCard();
+            cardList.Remove(selectCard.GetComponent<RectTransform>());
+            selectCard = null;
+        });
     }
 
     public void DiscardButton()
@@ -144,8 +270,18 @@ public class CardSlotManager : Singleton<CardSlotManager>
             {
                 int rand = Random.Range(0, useCards.Length);
                 UseCard tempCard = useCards[rand];
-                UseCardGenerator.CreateRandomCard(tempCard);
+                
+                if(tempCard.isBot)
+                {
+                    UseCardGenerator.CreateRandomBotCard(tempCard);
+                }
+                else
+                {
+                    UseCardGenerator.CreateRandomCard(tempCard);
+                }
+
                 cards[i].AddCard(tempCard, rankImage[(int)tempCard.cardRank]);
+
 
                 if(tempCard.cardRank == CardRank.Legend)
                 {

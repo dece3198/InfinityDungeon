@@ -4,11 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum UpGradeType
-{
-    Atk, Def, Hp
-}
-
 public class DungeonManager : Singleton<DungeonManager>
 {
     [SerializeField] private int levelIndex;
@@ -92,51 +87,65 @@ public class DungeonManager : Singleton<DungeonManager>
         }
     }
 
-    public void UpGradeUnit(Card card, UpGradeType type)
+    public void UpGradeUnit(Card card)
     {
-        if(type == UpGradeType.Atk)
+        for (int i = 0; i < curUnits.Count; i++)
         {
-            for(int i = 0; i < curUnits.Count; i++)
+            if (curUnits[i].TryGetComponent(out UnitController controller))
             {
-                if (curUnits[i].TryGetComponent(out UnitController controller))
+                if (card.mercenary == controller.mercenary)
                 {
-                    if (card.mercenary == controller.mercenary)
+                    switch (card.cardType)
                     {
-                        switch (type)
-                        {
-                            case UpGradeType.Atk: controller.mercenary.atk += card.value; break;
-                            case UpGradeType.Def: controller.mercenary.def += card.value; break;
-                            case UpGradeType.Hp: controller.mercenary.hp += card.value; break;
-                        }
-                        if (controller.gameObject.activeInHierarchy)
-                        {
-                            controller.upEffect.Play();
-                        }
-                        controller.AddStats();
+                        case CardType.UnitAtk : controller.mercenary.atk += card.value; break;
+                        case CardType.UnitDef: controller.mercenary.def += card.value; break;
+                        case CardType.UnitHp: controller.mercenary.hp += card.value; break;
                     }
+                    if (controller.gameObject.activeInHierarchy)
+                    {
+                        controller.upEffect.Play();
+                    }
+                    controller.AddStats();
                 }
             }
         }
     }
 
-    public void AllUnitUpGrade(Card card, UpGradeType type)
+    public void AllUnitUpGrade(Card card)
     {
         for(int i = 0; i < curUnits.Count; i++)
         {
             if (curUnits[i].TryGetComponent(out UnitController controller))
             {
-                switch (type)
+                switch (card.cardType)
                 {
-                    case UpGradeType.Atk:
-                        controller.mercenary.atk += card.value; break;
-                    case UpGradeType.Def: controller.mercenary.def += card.value; break;
-                    case UpGradeType.Hp: controller.mercenary.hp += card.value; break;
+                    case CardType.AllAtk: controller.mercenary.atk += card.value; break;
+                    case CardType.AllDef: controller.mercenary.def += card.value; break;
+                    case CardType.AllHp: controller.mercenary.hp += card.value; break;
                 }
                 if (controller.gameObject.activeInHierarchy)
                 {
                     controller.upEffect.Play();
                 }
                 controller.AddStats();
+            }
+        }
+    }
+
+    public void RandomUnitUpGrade(UseCard card)
+    {
+        int rand = Random.Range(0, curUnits.Count);
+        curUnits[rand].GetComponent<UnitController>().Buff(card);
+    }
+
+    public void RestUnit()
+    {
+        for(int i = 0; i < curUnits.Count; i++)
+        {
+            if (curUnits[i].TryGetComponent(out UnitController controller))
+            {
+                controller.AddStats();
+                controller.ResetUnit();
             }
         }
     }
@@ -152,7 +161,7 @@ public class DungeonManager : Singleton<DungeonManager>
         }
     }
 
-    private void AddUnit(UnitController unit)
+    public void AddUnit(UnitController unit)
     {
         for(int i = 0; i < waitSlot.Length; i++)
         {

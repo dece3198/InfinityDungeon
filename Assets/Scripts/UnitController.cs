@@ -342,6 +342,31 @@ public class AreaWizardSkill : SkillBehaviour
     }
 }
 
+public class TankerBotSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        unit.skill[1].Play();
+        float tempDef = unit.def;
+        unit.def *= 2;
+        yield return new WaitForSeconds(10f);
+        unit.def = tempDef;
+    }
+}
+
+public class SubTankerBotSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(1f);
+        unit.skill[1].Play();
+        float skillDmg = unit.atk * unit.skillDmg;
+        unit.viewDetector.FindRangeAttack(skillDmg, unit.critRate,unit.critDmg);
+    }
+}
+
 public class UnitIdle : BaseState<UnitController>
 {
     public override void Enter(UnitController state)
@@ -670,14 +695,21 @@ public class UnitController : MonoBehaviour
     public GameObject shieldObj;
     public UnitSlot unitSlot;
     public UnitSlot tempSlot;
-    public Vector3 orignPos;
     private SkillBehaviour skillBehaviour;
 
+    private List<Transform> icons = new List<Transform> ();
+    [SerializeField] private Transform atkIcon;
+    [SerializeField] private Transform defIcon;
+    [SerializeField] private Transform hpIcon;
+    [SerializeField] private ParticleSystem buffEffect;
+
+    private Vector3 orignPos;
     public bool isMan;
     public bool isWait = true;
     public bool isSelect = false;
     public bool isAD = false;
     public bool isAtk = true;
+    [SerializeField] private bool isBot = false;
 
     private void Awake()
     {
@@ -710,6 +742,8 @@ public class UnitController : MonoBehaviour
             case MercenaryClass.Tanker: skillBehaviour = new TankerSkill(); break;
             case MercenaryClass.FocusWizard: skillBehaviour = new FocusWizardSkill(); break;
             case MercenaryClass.AreaWizard: skillBehaviour = new AreaWizardSkill(); break;
+            case MercenaryClass.TankerBot: skillBehaviour = new TankerBotSkill(); break;
+            case MercenaryClass.SubTankerBot: skillBehaviour = new SubTankerBotSkill(); break;
         }
     }
 
@@ -757,6 +791,66 @@ public class UnitController : MonoBehaviour
         def = mercenary.def;
         Hp = mercenary.hp;
         maxHp = Hp;
+    }
+
+    public void Buff(UseCard card)
+    {
+        switch (card.useType)
+        {
+            case UseType.UnitAtk:
+                atk += atk * card.level * 0.01f;
+                if (!icons.Contains(atkIcon))
+                {
+                    atkIcon.gameObject.SetActive(true);
+                    icons.Add(atkIcon);
+                }
+                break;
+
+            case UseType.UnitDef:
+                def += def * card.level * 0.01f;
+                if (!icons.Contains(defIcon))
+                {
+                    defIcon.gameObject.SetActive(true);
+                    icons.Add(defIcon);
+                }
+                break;
+
+            case UseType.UnitHp:
+                Hp += Hp * card.level * 0.01f;
+                if (!icons.Contains(hpIcon))
+                {
+                    hpIcon.gameObject.SetActive(true);
+                    icons.Add(hpIcon);
+                }
+                break;
+        }
+
+        buffEffect.gameObject.SetActive(true);
+        RefreshIconPositions();
+    }
+
+    private void RefreshIconPositions()
+    {
+        int count = icons.Count;
+        if (count == 0) return;
+
+        float startX = -(0.5f * (count - 1) * 0.5f);
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 pos = icons[i].localPosition;
+            pos.x = startX + (0.5f * i);
+            pos.y = 2.75f;
+            icons[i].localPosition = pos;
+        }
+    }
+
+    public void ResetUnit()
+    {
+        atkIcon.gameObject.SetActive(false);
+        defIcon.gameObject.SetActive(false);
+        hpIcon.gameObject.SetActive(false);
+        buffEffect.gameObject.SetActive(false);
     }
 
     public void TakeHit(float damage)
@@ -852,6 +946,16 @@ public class UnitController : MonoBehaviour
 
             other.tempSlot = tempSlot;
             tempSlot = unitSlot;
+
+            if(isBot && other != this)
+            {
+                DungeonManager.instance.LevelIndex--;
+            }
+            
+            if(other.isBot && other != this)
+            {
+                DungeonManager.instance.LevelIndex++;
+            }
         }
         else
         {
@@ -871,7 +975,10 @@ public class UnitController : MonoBehaviour
                 if (!isWait)
                 {
                     isWait = true;
-                    DungeonManager.instance.LevelIndex--;
+                    if(!isBot)
+                    {
+                        DungeonManager.instance.LevelIndex--;
+                    }
                 }
             }
             else
@@ -880,7 +987,10 @@ public class UnitController : MonoBehaviour
                 if (isWait)
                 {
                     isWait = false;
-                    DungeonManager.instance.LevelIndex++;
+                    if(!isBot)
+                    {
+                        DungeonManager.instance.LevelIndex++;
+                    }
                 }
             }
         }
@@ -932,7 +1042,6 @@ public class UnitController : MonoBehaviour
         arrow.transform.parent = transform;
         arrowStack.Push(arrow);
     }
-
 
     public void ChangeState(UnitState state)
     {

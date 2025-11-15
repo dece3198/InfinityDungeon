@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f43a85ee121258f468fcef59fb88c8a6, type: 3}
-  m_Name: MonsterStun
+  m_Name: UnitAtk
   m_EditorClassIdentifier: Assembly-CSharp::UseCard
   level: 16
-  cardName: RandomStunDeBuff
-  cardImage: {fileID: 21300000, guid: 705b6155a20259d4c999d90b61a781d7, type: 3}
-  useType: 3
+  cardName: RandomUnitDamageUp
+  cardImage: {fileID: 21300000, guid: 9457b5ac28e7f3341b40077667ca4431, type: 3}
+  useType: 4
   cardRank: 1
   stageState: 1

@@ -67,12 +67,12 @@ public static class CardGenerator
         float baseValue = _card.level;
         switch (_card.cardType)
         {
-            case CardType.UnitAtk: baseValue *= 0.5f; break;
-            case CardType.UnitDef: baseValue *= 0.3f; break;
-            case CardType.UnitHp: baseValue *= 3f; break;
-            case CardType.AllAtk: baseValue *= 0.2f; break;
-            case CardType.AllDef: baseValue *= 0.1f; break;
-            case CardType.AllHp: baseValue *= 1f; break;
+            case CardType.UnitAtk: baseValue *= 0.1f; break;
+            case CardType.UnitDef: baseValue *= 0.1f; break;
+            case CardType.UnitHp: baseValue *= 1f; break;
+            case CardType.AllAtk: baseValue *= 0.05f; break;
+            case CardType.AllDef: baseValue *= 0.05f; break;
+            case CardType.AllHp: baseValue *= 0.3f; break;
 
         }
         return Mathf.RoundToInt(baseValue);
@@ -163,6 +163,7 @@ public class CardManager : Singleton<CardManager>
         cardSlot.transform.position = orignPos;
         dissolveICard.SetActive(true);
         cardParent.SetActive(false);
+        dissolve.SetFloat("_DissolveAmount", 0);
         float time = 0f;
         while (time < 2f)
         {
@@ -171,19 +172,8 @@ public class CardManager : Singleton<CardManager>
             yield return null;
         }
         dissolveICard.SetActive(false);
-        dissolve.SetFloat("_DissolveAmount", 0);
         selectEffect.Play();
-        switch (tempCard.cardType)
-        {
-            case CardType.UnitAtk: DungeonManager.instance.UpGradeUnit(tempCard, UpGradeType.Atk);break;
-            case CardType.UnitDef: DungeonManager.instance.UpGradeUnit(tempCard, UpGradeType.Def); break;
-            case CardType.UnitHp: DungeonManager.instance.UpGradeUnit(tempCard, UpGradeType.Hp); break;
-            case CardType.AllAtk: DungeonManager.instance.AllUnitUpGrade(tempCard, UpGradeType.Atk); break;
-            case CardType.AllDef: DungeonManager.instance.AllUnitUpGrade(tempCard, UpGradeType.Def); break;
-            case CardType.AllHp: DungeonManager.instance.AllUnitUpGrade(tempCard, UpGradeType.Hp); break;
-            case CardType.Level: DungeonManager.instance.Exp += tempCard.value; break;
-            case CardType.Gold: DungeonManager.instance.Gold += tempCard.value; break;
-        }
+        UpGradeCard(tempCard);
         CardReset();
     }
 
@@ -191,12 +181,14 @@ public class CardManager : Singleton<CardManager>
     {
         switch(card.cardType)
         {
-            case CardType.UnitAtk: DungeonManager.instance.UpGradeUnit(card, UpGradeType.Atk); break;
-            case CardType.UnitDef: DungeonManager.instance.UpGradeUnit(card, UpGradeType.Def); break;
-            case CardType.UnitHp: DungeonManager.instance.UpGradeUnit(card, UpGradeType.Hp); break;
-            case CardType.AllAtk: DungeonManager.instance.AllUnitUpGrade(card, UpGradeType.Atk); break;
-            case CardType.AllDef: DungeonManager.instance.AllUnitUpGrade(card, UpGradeType.Def); break;
-            case CardType.AllHp: DungeonManager.instance.AllUnitUpGrade(card, UpGradeType.Hp); break;
+            case CardType.UnitAtk: DungeonManager.instance.UpGradeUnit(card); break;
+            case CardType.UnitDef: DungeonManager.instance.UpGradeUnit(card); break;
+            case CardType.UnitHp: DungeonManager.instance.UpGradeUnit(card); break;
+            case CardType.AllAtk: DungeonManager.instance.AllUnitUpGrade(card); break;
+            case CardType.AllDef: DungeonManager.instance.AllUnitUpGrade(card); break;
+            case CardType.AllHp: DungeonManager.instance.AllUnitUpGrade(card); break;
+            case CardType.Level: DungeonManager.instance.Exp += card.value; break;
+            case CardType.Gold: DungeonManager.instance.Gold += card.value; break;
         }
 
     }

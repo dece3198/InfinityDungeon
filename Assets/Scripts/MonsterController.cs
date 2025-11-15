@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -202,6 +204,7 @@ public class MonsterController : Monster, IInteraction
 
     public float maxHp;
     public float speed;
+    public float def;
     public float atk;
     public float atkSpeed;
     public float stun;
@@ -209,6 +212,10 @@ public class MonsterController : Monster, IInteraction
     [SerializeField] SkinnedMeshRenderer[] renderers;
     [SerializeField] private TextManager textManager;
     [SerializeField] private Slider hpBar;
+    [SerializeField] private List<Transform> icons = new List<Transform>();
+    [SerializeField] private Transform atkIcon;
+    [SerializeField] private Transform defIcon;
+    [SerializeField] private Transform speedIcon;
     public Transform canvas;
     public MonsterState monsterState;
     public Animator animator;
@@ -216,7 +223,7 @@ public class MonsterController : Monster, IInteraction
     public ViewDetector viewDetector;
     public Transform center;
     private StateMachine<MonsterState, MonsterController> stateMachine = new StateMachine<MonsterState, MonsterController>();
-
+    public ParticleSystem deBuffEffect;
     public bool isProvoke = true;
 
     private void Awake()
@@ -264,6 +271,62 @@ public class MonsterController : Monster, IInteraction
         if (viewDetector.AttackTarget != null)
         {
             viewDetector.AttackTarget.GetComponent<UnitController>().TakeHit(atk);
+        }
+    }
+
+    public void DeBuff(UseCard card)
+    {
+        switch (card.useType)
+        {
+            case UseType.MonsterAtk:
+                atk -= atk * card.level * 0.01f;
+                if (!icons.Contains(atkIcon))
+                {
+                    atkIcon.gameObject.SetActive(true);
+                    icons.Add(atkIcon);
+                }
+                break;
+
+            case UseType.MonsterDef:
+                def -= def * card.level * 0.01f;
+                if (!icons.Contains(defIcon))
+                {
+                    defIcon.gameObject.SetActive(true);
+                    icons.Add(defIcon);
+                }
+                break;
+
+            case UseType.MonsterSpeed:
+                speed -= speed * card.level * 0.01f;
+                if (!icons.Contains(speedIcon))
+                {
+                    speedIcon.gameObject.SetActive(true);
+                    icons.Add(speedIcon);
+                }
+                break;
+
+            case UseType.MonsterStun:
+                stun = card.level * 0.1f;
+                ChangeState(MonsterState.Stun);
+                break;
+        }
+        RefreshIconPositions();
+        deBuffEffect.Play();
+    }
+
+    private void RefreshIconPositions()
+    {
+        int count = icons.Count;
+        if (count == 0) return;
+
+        float startX = -(0.5f * (count - 1) * 0.5f);
+
+        for(int i = 0; i < count; i++)
+        {
+            Vector3 pos = icons[i].localPosition;
+            pos.x = startX + (0.5f * i);
+            pos.y = 3.5f;
+            icons[i].localPosition = pos;
         }
     }
 

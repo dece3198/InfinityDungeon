@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f43a85ee121258f468fcef59fb88c8a6, type: 3}
+  m_Name: TankerBot
+  m_EditorClassIdentifier: Assembly-CSharp::UseCard
+  level: 90
+  cardName: TankerBot
+  cardImage: {fileID: 21300000, guid: eb2ebd079bb442a4a9a9e48cd9f3e973, type: 3}
+  useType: 7
+  cardRank: 3
+  stageState: 0
+  mercenary: {fileID: 11400000, guid: db6fea21b7f3e7b4a977cc651fe0f409, type: 2}
+  isBot: 1
+  botPrefab: {fileID: 3377784846264949765, guid: 87a9c87c2121b5847915dd9c8236ee73, type: 3}
+  LegendPrefab: {fileID: 5033836675620580626, guid: b2914243597f1b9408895c6da3ebdac3, type: 3}

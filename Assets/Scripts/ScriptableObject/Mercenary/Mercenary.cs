@@ -7,7 +7,7 @@ public enum Rank
 
 public enum MercenaryClass
 {
-    SwordsWoman, Shielder, Archer, FocusWizard, Assassin, Mauler, Lancer, Berserker, Hunter, Warrior, Thrower, Tanker, Healer, AreaWizard
+    SwordsWoman, Shielder, Archer, FocusWizard, Assassin, Mauler, Lancer, Berserker, Hunter, Warrior, Thrower, Tanker, Healer, AreaWizard, TankerBot, SubTankerBot, ADBot
 }
 
 [CreateAssetMenu(fileName = "New Mercenary", menuName = "New Mercenary/Mercenary")]
@@ -98,6 +98,12 @@ public class Mercenary : ScriptableObject
                 break;
             case MercenaryClass.AreaWizard:
                 atk = 10; atkSpeed = 1f; def = 10; speed = 1; hp = 50; skillDamage = 10f; criticalPercent = 0.5f; criticalDamage = 2f;
+                break;
+            case MercenaryClass.TankerBot:
+                atk = 5; atkSpeed = 2f; def = 10; speed = 1; hp = 200; skillDamage = 4f; criticalPercent = 0.5f; criticalDamage = 2f;
+                break;
+            case MercenaryClass.SubTankerBot:
+                atk = 10; atkSpeed = 2f; def = 10; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
         }
 

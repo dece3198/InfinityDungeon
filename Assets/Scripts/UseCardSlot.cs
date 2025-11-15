@@ -1,5 +1,7 @@
 using DG.Tweening;
+using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,6 +18,7 @@ public class UseCardSlot : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     [SerializeField] private GameObject select;
     [SerializeField] private Transform usePos;
     [SerializeField] private Transform deletePos;
+    [SerializeField] private Material dissolveMat;
     public Transform legendCard;
     private RectTransform rect;
     private Vector2 originalLocalPos;
@@ -65,9 +68,11 @@ public class UseCardSlot : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         card = null;
         transform.localEulerAngles = Vector3.zero;
         legendCard.localScale = Vector3.zero;
+        transform.localScale = Vector3.one;
         legendCard.gameObject.SetActive(false);
         gameObject.SetActive(false);
         select.SetActive(false);
+        isSelect = false;
         isUse = false;
     }
 
@@ -92,14 +97,18 @@ public class UseCardSlot : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             rect.DOAnchorPos(originalLocalPos + new Vector2(0, 150f), 0.18f).SetEase(Ease.OutQuad);
             transform.DOScale(originalScale * 1.2f, 0.18f).SetEase(Ease.OutBack).OnComplete(() =>
             {
-                CardSlotManager.instance.useButton.gameObject.SetActive(true);
-                CardSlotManager.instance.deleteButton.gameObject.SetActive(true);
-                CardSlotManager.instance.useButton.SetParent(usePos, false);
-                CardSlotManager.instance.useButton.localPosition = Vector3.zero;
-                CardSlotManager.instance.useButton.localEulerAngles = new Vector3(0, 180f, 0);
-                CardSlotManager.instance.deleteButton.SetParent(deletePos, false);
-                CardSlotManager.instance.deleteButton.localEulerAngles = new Vector3(0, 180f, 0);
-                CardSlotManager.instance.deleteButton.localPosition = Vector3.zero;
+                if(card.stageState == StageManager.instance.stageState)
+                {
+                    CardSlotManager.instance.useButton.gameObject.SetActive(true);
+                    CardSlotManager.instance.deleteButton.gameObject.SetActive(true);
+                    CardSlotManager.instance.useButton.SetParent(usePos, false);
+                    CardSlotManager.instance.useButton.localPosition = Vector3.zero;
+                    CardSlotManager.instance.useButton.localEulerAngles = new Vector3(0, 180f, 0);
+                    CardSlotManager.instance.deleteButton.SetParent(deletePos, false);
+                    CardSlotManager.instance.deleteButton.localEulerAngles = new Vector3(0, 180f, 0);
+                    CardSlotManager.instance.deleteButton.localPosition = Vector3.zero;
+                    CardSlotManager.instance.selectCard = this;
+                }
             });
         }
         else
@@ -112,7 +121,25 @@ public class UseCardSlot : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
             rect.DOAnchorPos(originalLocalPos, 0.18f).SetEase(Ease.OutQuad);
             transform.DOScale(originalScale, 0.18f).SetEase(Ease.OutBack);
+            CardSlotManager.instance.selectCard = null;
         }
 
+    }
+
+    public IEnumerator DissolveCo()
+    {
+        nameText.gameObject.SetActive(false);
+        levelTextA.gameObject.SetActive(false);
+        levelTextB.gameObject.SetActive(false);
+        valueTextA.gameObject.SetActive(false);
+        dissolveMat.SetFloat("_DissolveAmount", 0);
+        float time = 0;
+        while(time < 1)
+        {
+            time += Time.deltaTime;
+            dissolveMat.SetFloat("_DissolveAmount", time);
+            yield return null;
+        }
+        CardSlotManager.instance.useEffect.Play();
     }
 }

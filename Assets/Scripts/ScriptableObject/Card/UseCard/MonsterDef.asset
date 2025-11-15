@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: MonsterDef
   m_EditorClassIdentifier: Assembly-CSharp::UseCard
   level: 0
-  cardName: DefenseDeBuff
+  cardName: RandomDefenseDeBuff
   cardImage: {fileID: 21300000, guid: ce65d11814cf97f429e36f05fff7ee6c, type: 3}
   useType: 1
   cardRank: 0
+  stageState: 1
