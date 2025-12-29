@@ -51,6 +51,18 @@ public class EndStage : BaseState<StageManager>
 {
     public override void Enter(StageManager state)
     {
+        DungeonManager.instance.RestUnit();
+        List<GameObject> curUnit = DungeonManager.instance.curUnits;
+        for (int i = 0; i < curUnit.Count; i++)
+        {
+            if (curUnit[i].TryGetComponent(out UnitController unit))
+            {
+                if(unit.unitSlot != null)
+                {
+                    unit.unitSlot.ClearSlot();
+                }
+            }
+        }
     }
 
     public override void Exit(StageManager state)
@@ -72,6 +84,22 @@ public class StageManager : Singleton<StageManager>
     public Transform[] startPos;
     public List<MonsterController> monsterList = new List<MonsterController>();
     public int stageIndex;
+    private int monsterCount;
+    public int MonsterCount
+    {
+        get 
+        { 
+            return monsterCount; 
+        }
+        set 
+        {
+            monsterCount = value; 
+            if(monsterCount <= 0)
+            {
+                ChangeState(StageState.End);
+            }
+        }
+    }
     [SerializeField] private TextMeshProUGUI startText;
     public StageState stageState;
     private StateMachine<StageState, StageManager> stateMachine = new StateMachine<StageState, StageManager>();
@@ -99,6 +127,7 @@ public class StageManager : Singleton<StageManager>
     {
         for (int i = 0; i < stage[stageIndex].monsterSpawns.Length; i++)
         {
+            MonsterCount++;
             MonsterSpawn spawn = stage[stageIndex].monsterSpawns[i];
             GameObject monster = Instantiate(spawn.monsterPrefab, startPos[spawn.index]);
             if (monster.TryGetComponent(out MonsterController m))

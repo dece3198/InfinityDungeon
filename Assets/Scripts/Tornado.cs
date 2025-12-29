@@ -4,16 +4,18 @@ using UnityEngine;
 public class Tornado : MonoBehaviour
 {
     private UnitController unit;
-    private MonsterController target;
     [SerializeField] private float speed;
-    private bool isActive;
+    private ViewDetector viewDetector;
     private bool isAtk;
 
-    public void SetTarget(UnitController u, MonsterController t)
+    private void Awake()
+    {
+        viewDetector = GetComponent<ViewDetector>();
+    }
+
+    public void SetTarget(UnitController u)
     {
         unit = u;
-        target = t;
-        isActive = true;
         isAtk = true;
     }
 
@@ -24,11 +26,14 @@ public class Tornado : MonoBehaviour
 
     private void Update()
     {
-        if (!isActive || target == null) return;
+        viewDetector.FindTarget();
 
-        Vector3 dir = (target.transform.position - transform.position).normalized;
+        if(viewDetector.Target != null)
+        {
+            Vector3 dir = (viewDetector.Target.transform.position - transform.position).normalized;
 
-        transform.position += dir * speed * Time.deltaTime;
+            transform.position += dir * speed * Time.deltaTime;
+        }
     }
 
     private void OnTriggerStay(Collider other)

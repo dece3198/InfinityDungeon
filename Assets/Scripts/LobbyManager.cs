@@ -118,6 +118,11 @@ public class LobbyManager : Singleton<LobbyManager>
         RecruitmentIndex = 0;
         orignPos = new Vector2(5000, 5000);
         StartCoroutine(FadeOut());
+
+        foreach(var r in randerUi)
+        {
+            r.stateParent.SetActive(false);
+        }    
     }
 
     //종이 세팅
@@ -215,6 +220,7 @@ public class LobbyManager : Singleton<LobbyManager>
         }
     }
 
+    //용병 영입 했을때 Ui 
     public void RanderTextureMercenary(MercenaryController mercenary)
     {
         mercenary.ChangeState(MercenaryState.Idle);
@@ -222,6 +228,7 @@ public class LobbyManager : Singleton<LobbyManager>
         mercenary.transform.position = randerPos[randerIndex].position;
         randerUi[randerIndex].gameObject.SetActive(true);
         randerUi[randerIndex].AddMercenary(mercenary.mercenary);
+        randerUi[randerIndex].stateParent.SetActive(true);
         randerIndex++;
     }
 

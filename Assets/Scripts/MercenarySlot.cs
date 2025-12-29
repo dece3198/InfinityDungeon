@@ -4,6 +4,7 @@ using UnityEngine;
 public class MercenarySlot : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI[] statsText;
+    public GameObject stateParent;
 
     public void AddMercenary(Mercenary mercenary)
     {

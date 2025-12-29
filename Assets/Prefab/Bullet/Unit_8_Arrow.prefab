@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1701479333394016792}
   - component: {fileID: 1032669254328215969}
   m_Layer: 0
-  m_Name: ArrowMissileRed
+  m_Name: Unit_8_Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4933,6 +4933,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Arrow
   speed: 30
+  bulletType: 0
 --- !u!65 &1032669254328215969
 BoxCollider:
   m_ObjectHideFlags: 0

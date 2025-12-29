@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84e0e864558173f48829b3be0a5bb0c5, type: 3}
-  m_Name: Stage_1
+  m_Name: Stage_2
   m_EditorClassIdentifier: Assembly-CSharp::Stage
   monsterSpawns:
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
+  - monsterPrefab: {fileID: 7626273335867298912, guid: ca87b704c9d7dfc4994ab4f44615c187, type: 3}
     index: 10
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
+  - monsterPrefab: {fileID: 7626273335867298912, guid: ca87b704c9d7dfc4994ab4f44615c187, type: 3}
     index: 13
-  - monsterPrefab: {fileID: 7626273335867298912, guid: 761043df5d536d5498d23d09782ce127, type: 3}
+  - monsterPrefab: {fileID: 7626273335867298912, guid: ca87b704c9d7dfc4994ab4f44615c187, type: 3}
     index: 16

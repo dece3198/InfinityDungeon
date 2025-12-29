@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public enum UnitState
 {
-    Idle, Walk, Stun, Attack, Skill, Die
+    Idle, Walk, Stun, Attack, Skill, Die, Exit
 }
 
 public abstract class SkillBehaviour
@@ -32,6 +32,8 @@ public class SwordsWomanSkill : SkillBehaviour
             unit.skill[3].transform.position = unit.viewDetector.AttackTarget.transform.position;
             unit.skill[3].Play();
         }
+
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -52,6 +54,7 @@ public class ShielderSkill : SkillBehaviour
         {
             unit.StartCoroutine(ApplyShield(unit, allies[i], unit.skill[i + 1]));
         }
+        unit.ChangeState(UnitState.Idle);
     }
 
     private IEnumerator ApplyShield(UnitController state, UnitController target, ParticleSystem skill)
@@ -87,11 +90,12 @@ public class ArcherSkill : SkillBehaviour
         unit.viewDetector.FindAttackTarget();
         if (unit.viewDetector.AttackTarget != null)
         {
-            unit.skill[1].GetComponent<Tornado>().SetTarget(unit, unit.viewDetector.AttackTarget.GetComponent<MonsterController>());
+            unit.skill[1].GetComponent<Tornado>().SetTarget(unit);
         }
         unit.skill[2].gameObject.SetActive(false);
         unit.skill[1].gameObject.SetActive(true);
         unit.skill[1].Play();
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -103,6 +107,7 @@ public class HealerSkill : SkillBehaviour
         yield return new WaitForSeconds(0.5f);
         unit.skill[1].Play();
         unit.viewDetector.AllFindHealHeal(unit.atk * unit.skillDmg);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -173,6 +178,7 @@ public class MaulerSkill : SkillBehaviour
         unit.atk /= 2;
         unit.maxHp /= 2;
         unit.Hp -= unit.maxHp;
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -190,6 +196,7 @@ public class LancerSkill : SkillBehaviour
             yield return new WaitForSeconds(0.1733f);
         }
         unit.skill[1].gameObject.SetActive(false);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -200,12 +207,14 @@ public class BerserkerSkill : SkillBehaviour
         unit.animator.SetTrigger("Skill_0");
         yield return new WaitForSeconds(0.75f);
         unit.skill[3].gameObject.SetActive(true);
+        unit.rigid.AddForce(Vector3.up * 5f, ForceMode.Impulse);
         unit.skill[1].Play();
         yield return new WaitForSeconds(1f);
         unit.skill[2].Play();
         float skillD = unit.atk * unit.skillDmg;
         unit.viewDetector.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
         unit.skill[3].gameObject.SetActive(false);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -235,6 +244,7 @@ public class HunterSkill : SkillBehaviour
                 skill.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
             }
         }
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -259,6 +269,7 @@ public class WarriorSkill : SkillBehaviour
         unit.pullPosition.DOScale(unit.pullPosition.localScale / 2, 1f).SetEase(Ease.OutBack);
         unit.pullPosition.gameObject.SetActive(false);
         unit.restPosition.gameObject.SetActive(true);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -288,6 +299,7 @@ public class ThrowerSkill : SkillBehaviour
                 skill.FindRangeAttack(skillD, unit.critRate, unit.critDmg);
             }
         }
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -302,6 +314,7 @@ public class TankerSkill : SkillBehaviour
         unit.skill[2].gameObject.SetActive(true);
         float orignDef = unit.def;
         unit.def *= 2;
+        unit.ChangeState(UnitState.Idle);
         yield return new WaitForSeconds(10);
         unit.def = orignDef;
         unit.skill[2].gameObject.SetActive(false);
@@ -322,6 +335,7 @@ public class FocusWizardSkill : SkillBehaviour
             s.gameObject.SetActive(true);
         }
         unit.skill[3].gameObject.SetActive(false);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -339,6 +353,7 @@ public class AreaWizardSkill : SkillBehaviour
             v.FindStunTarget(3.5f);
         }
         unit.skill[2].gameObject.SetActive(false);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -350,8 +365,10 @@ public class TankerBotSkill : SkillBehaviour
         unit.skill[1].Play();
         float tempDef = unit.def;
         unit.def *= 2;
+        unit.ChangeState(UnitState.Idle);
         yield return new WaitForSeconds(10f);
         unit.def = tempDef;
+        
     }
 }
 
@@ -364,6 +381,32 @@ public class SubTankerBotSkill : SkillBehaviour
         unit.skill[1].Play();
         float skillDmg = unit.atk * unit.skillDmg;
         unit.viewDetector.FindRangeAttack(skillDmg, unit.critRate,unit.critDmg);
+        unit.ChangeState(UnitState.Idle);
+    }
+}
+
+public class ADBotSkill : SkillBehaviour
+{
+    public override IEnumerator Skill(UnitController unit)
+    {
+        unit.animator.SetTrigger("Skill_0");
+        yield return new WaitForSeconds(1f);
+        unit.skill[1].gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        unit.skill[1].gameObject.SetActive(false);
+        unit.animator.SetBool("Move", true);
+        yield return new WaitForSeconds(0.5f);
+        unit.skill[2].transform.position = unit.skillPos.position;
+        if (unit.viewDetector.AttackTarget.TryGetComponent(out MonsterController controller))
+        {
+            if (unit.skill[2].TryGetComponent(out Arrow a))
+            {
+                a.SetTarget(unit, controller, unit.skill[0]);
+            }
+        }
+        unit.skill[2].gameObject.SetActive(true);
+        unit.animator.SetBool("Move", false);
+        unit.ChangeState(UnitState.Idle);
     }
 }
 
@@ -499,6 +542,7 @@ public class UnitAttack : BaseState<UnitController>
                 case MercenaryClass.Thrower: state.StartCoroutine(PlayBowAnimation(state)); break;
                 case MercenaryClass.FocusWizard: state.StartCoroutine(WizardAttackCo(state)); break;
                 case MercenaryClass.AreaWizard: state.StartCoroutine(WizardAttackCo(state)); break;
+                case MercenaryClass.ADBot: state.StartCoroutine(PlayBowAnimation(state)); break;
             }
         }
         else
@@ -605,6 +649,12 @@ public class UnitDie : BaseState<UnitController>
 {
     public override void Enter(UnitController state)
     {
+        state.StopAllCoroutines();
+        state.gameObject.layer = 0;
+        state.gameObject.SetActive(false);
+        state.unitSlot.ClearSlot();
+        DungeonManager.instance.curUnits.Remove(state.gameObject);
+        DungeonManager.instance.dieUnits.Add(state.gameObject);
     }
 
     public override void Exit(UnitController state)
@@ -620,7 +670,27 @@ public class UnitDie : BaseState<UnitController>
     }
 }
 
-public class UnitController : MonoBehaviour
+public class UnitExit : BaseState<UnitController>
+{
+    public override void Enter(UnitController state)
+    {
+        state.unitSlot.ClearSlot();
+    }
+
+    public override void Exit(UnitController state)
+    {
+    }
+
+    public override void FixedUpdate(UnitController state)
+    {
+    }
+
+    public override void Update(UnitController state)
+    {
+    }
+}
+
+public class UnitController : MonoBehaviour, IInteraction
 {
     [SerializeField] private float hp;
     public float Hp
@@ -684,13 +754,13 @@ public class UnitController : MonoBehaviour
     public Transform skillPos;
     public ParticleSystem[] skill;
     public ParticleSystem upEffect;
-    [SerializeField] private GameObject arrowtPrefab;
+    [SerializeField] private GameObject arrowPrefab;
     private Stack<GameObject> arrowStack = new Stack<GameObject> ();
     public Transform band;
     public Transform restPosition;
     public Transform pullPosition;
     public TextManager textManager;
-    [SerializeField] private Transform center;
+    public Transform center;
     private StateMachine<UnitState, UnitController> stateMachine = new StateMachine<UnitState, UnitController>();
     public GameObject shieldObj;
     public UnitSlot unitSlot;
@@ -744,6 +814,7 @@ public class UnitController : MonoBehaviour
             case MercenaryClass.AreaWizard: skillBehaviour = new AreaWizardSkill(); break;
             case MercenaryClass.TankerBot: skillBehaviour = new TankerBotSkill(); break;
             case MercenaryClass.SubTankerBot: skillBehaviour = new SubTankerBotSkill(); break;
+            case MercenaryClass.ADBot: skillBehaviour = new ADBotSkill(); break;
         }
     }
 
@@ -768,7 +839,7 @@ public class UnitController : MonoBehaviour
         {
             for(int i = 0; i < 10; i++)
             {
-                GameObject bullet = Instantiate(arrowtPrefab, band);
+                GameObject bullet = Instantiate(arrowPrefab, band);
                 arrowStack.Push(bullet);
             }
         }
@@ -853,7 +924,7 @@ public class UnitController : MonoBehaviour
         buffEffect.gameObject.SetActive(false);
     }
 
-    public void TakeHit(float damage)
+    public void TakeHit(float damage, TextType textType)
     {
         if(Shield > 0)
         {
@@ -923,11 +994,14 @@ public class UnitController : MonoBehaviour
 
         if (isLevel && !isWaitingSlot && other == null)
         {
-            transform.position = orignPos;
-            isSelect = false;
-            if (unitSlot != null)
-                unitSlot.check.SetActive(false);
-            return;
+            if(isWait)
+            {
+                transform.position = orignPos;
+                isSelect = false;
+                if (unitSlot != null)
+                    unitSlot.check.SetActive(false);
+                return;
+            }
         }
 
         if (other != null)
@@ -1017,8 +1091,7 @@ public class UnitController : MonoBehaviour
             else
             {
                 viewDetector.AttackTarget.GetComponent<IInteraction>().TakeHit(atk, TextType.Normal);
-            }
-            
+            } 
         }
     }
 
@@ -1029,8 +1102,13 @@ public class UnitController : MonoBehaviour
         {
             GameObject arrow = arrowStack.Pop();
             arrow.transform.position = band.position;
-            MonsterController targetCtrl = viewDetector.AttackTarget.GetComponent<MonsterController>();
-            arrow.GetComponent<Arrow>().SetTarget(this, targetCtrl, effect);
+            if(viewDetector.AttackTarget.TryGetComponent(out MonsterController controller))
+            {
+                if(arrow.TryGetComponent(out Arrow a))
+                {
+                    a.SetTarget(this, controller, effect);
+                }
+            }
             arrow.SetActive(true);
             arrow.transform.SetParent(null);
         }

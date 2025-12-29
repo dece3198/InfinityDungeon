@@ -2882,7 +2882,7 @@ MonoBehaviour:
   - {fileID: 8364965766012789482}
   - {fileID: 2978902639774756773}
   upEffect: {fileID: 3745837256597423079}
-  arrowtPrefab: {fileID: 6056321933277792007, guid: 26520403fcf26274e8c19ef4e92cb8b6, type: 3}
+  arrowPrefab: {fileID: 6056321933277792007, guid: 26520403fcf26274e8c19ef4e92cb8b6, type: 3}
   band: {fileID: 7355386849933291362}
   restPosition: {fileID: 0}
   pullPosition: {fileID: 0}

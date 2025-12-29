@@ -97,18 +97,15 @@ public class UseCardSlot : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             rect.DOAnchorPos(originalLocalPos + new Vector2(0, 150f), 0.18f).SetEase(Ease.OutQuad);
             transform.DOScale(originalScale * 1.2f, 0.18f).SetEase(Ease.OutBack).OnComplete(() =>
             {
-                if(card.stageState == StageManager.instance.stageState)
-                {
-                    CardSlotManager.instance.useButton.gameObject.SetActive(true);
-                    CardSlotManager.instance.deleteButton.gameObject.SetActive(true);
-                    CardSlotManager.instance.useButton.SetParent(usePos, false);
-                    CardSlotManager.instance.useButton.localPosition = Vector3.zero;
-                    CardSlotManager.instance.useButton.localEulerAngles = new Vector3(0, 180f, 0);
-                    CardSlotManager.instance.deleteButton.SetParent(deletePos, false);
-                    CardSlotManager.instance.deleteButton.localEulerAngles = new Vector3(0, 180f, 0);
-                    CardSlotManager.instance.deleteButton.localPosition = Vector3.zero;
-                    CardSlotManager.instance.selectCard = this;
-                }
+                CardSlotManager.instance.useButton.gameObject.SetActive(true);
+                CardSlotManager.instance.useButton.SetParent(usePos, false);
+                CardSlotManager.instance.useButton.localPosition = Vector3.zero;
+                CardSlotManager.instance.useButton.localEulerAngles = new Vector3(0, 180f, 0);
+                CardSlotManager.instance.deleteButton.gameObject.SetActive(true);
+                CardSlotManager.instance.deleteButton.SetParent(deletePos, false);
+                CardSlotManager.instance.deleteButton.localEulerAngles = new Vector3(0, 180f, 0);
+                CardSlotManager.instance.deleteButton.localPosition = Vector3.zero;
+                CardSlotManager.instance.selectCard = this;
             });
         }
         else
@@ -141,5 +138,6 @@ public class UseCardSlot : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             yield return null;
         }
         CardSlotManager.instance.useEffect.Play();
+        gameObject.SetActive(false);
     }
 }

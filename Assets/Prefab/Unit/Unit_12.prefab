@@ -1314,7 +1314,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: acd76795deeadd846a39bed2115bcc9b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.458
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: acd76795deeadd846a39bed2115bcc9b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1322,7 +1322,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: acd76795deeadd846a39bed2115bcc9b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: acd76795deeadd846a39bed2115bcc9b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3434,7 +3434,7 @@ MonoBehaviour:
   - {fileID: 6431907923126933203}
   - {fileID: 3632894420021293011}
   upEffect: {fileID: 7624308890485209252}
-  arrowtPrefab: {fileID: 5639763309395215668, guid: 3c38f2547b58b624f9e9831826601f50, type: 3}
+  arrowPrefab: {fileID: 5639763309395215668, guid: 3c38f2547b58b624f9e9831826601f50, type: 3}
   band: {fileID: 664292911904253022}
   restPosition: {fileID: 0}
   pullPosition: {fileID: 0}

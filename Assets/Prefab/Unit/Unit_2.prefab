@@ -2656,7 +2656,7 @@ MonoBehaviour:
   - {fileID: 7573377199698250586}
   - {fileID: 2863384288223578285}
   upEffect: {fileID: 2946080978647124776}
-  arrowtPrefab: {fileID: 4772781486680394350, guid: 6d658e9a1f2a4a54abcff77587c99bfa, type: 3}
+  arrowPrefab: {fileID: 4772781486680394350, guid: 6d658e9a1f2a4a54abcff77587c99bfa, type: 3}
   band: {fileID: 8305893909887000058}
   restPosition: {fileID: 7576192926975225578}
   pullPosition: {fileID: 7099569389944755222}
@@ -3329,6 +3329,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1657261246295108, guid: 848fa759b9145764d8a5a8fbf331237c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3050041547771661019}
+    - targetCorrespondingSourceObject: {fileID: 1657261246295108, guid: 848fa759b9145764d8a5a8fbf331237c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3066946380398312633}
   m_SourcePrefab: {fileID: 100100000, guid: 848fa759b9145764d8a5a8fbf331237c, type: 3}
 --- !u!198 &7573377199698250586 stripped
 ParticleSystem:
@@ -3379,3 +3382,27 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.5, y: 1.5, z: 3}
   m_Center: {x: 0, y: 0, z: 1.5}
+--- !u!114 &3066946380398312633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7773047798386103626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eae90133eb1f5dc489d0f089140bd47b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ViewDetector
+  target: {fileID: 0}
+  attackTarget: {fileID: 0}
+  radius: 50
+  attackRadius: 1.5
+  angle: 360
+  atkAngle: 360
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  sheldMask:
+    serializedVersion: 2
+    m_Bits: 0

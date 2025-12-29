@@ -53,6 +53,7 @@ public class DungeonManager : Singleton<DungeonManager>
         }
     }
     public List<GameObject> curUnits = new List<GameObject>();
+    public List<GameObject> dieUnits = new List<GameObject>();
     [SerializeField] private TextMeshProUGUI levelIndexText;
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI goldText;

@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -174,6 +173,11 @@ public class MonsterDie : BaseState<MonsterController>
 {
     public override void Enter(MonsterController state)
     {
+        state.StopAllCoroutines();
+        state.animator.SetBool("Move", false);
+        state.animator.SetTrigger("Die");
+        state.gameObject.layer = 0;
+        state.StartCoroutine(DieCo(state));
     }
 
     public override void Exit(MonsterController state)
@@ -187,6 +191,13 @@ public class MonsterDie : BaseState<MonsterController>
     public override void Update(MonsterController state)
     {
     }
+
+    private IEnumerator DieCo(MonsterController state)
+    {
+        yield return new WaitForSeconds(2.5f);
+        StageManager.instance.MonsterCount--;
+        state.gameObject.SetActive(false);
+    }
 }
 
 public class MonsterController : Monster, IInteraction
@@ -199,6 +210,10 @@ public class MonsterController : Monster, IInteraction
         { 
             hp = value;
             hpBar.value = Mathf.Clamp01(hp / maxHp);
+            if (hp <= 0)
+            {
+                ChangeState(MonsterState.Die);
+            }
         } 
     }
 
@@ -208,6 +223,9 @@ public class MonsterController : Monster, IInteraction
     public float atk;
     public float atkSpeed;
     public float stun;
+    public float critRate;
+    public float critDmg;
+    public float skillDmg;
     public GameObject stunEffect;
     [SerializeField] SkinnedMeshRenderer[] renderers;
     [SerializeField] private TextManager textManager;
@@ -216,6 +234,10 @@ public class MonsterController : Monster, IInteraction
     [SerializeField] private Transform atkIcon;
     [SerializeField] private Transform defIcon;
     [SerializeField] private Transform speedIcon;
+    [SerializeField] private GameObject arrowPrefab;
+    [SerializeField] private Transform arrowPos;
+    [SerializeField] private ParticleSystem[] skill;
+    private Stack<GameObject> arrowStack = new Stack<GameObject>();
     public Transform canvas;
     public MonsterState monsterState;
     public Animator animator;
@@ -225,6 +247,7 @@ public class MonsterController : Monster, IInteraction
     private StateMachine<MonsterState, MonsterController> stateMachine = new StateMachine<MonsterState, MonsterController>();
     public ParticleSystem deBuffEffect;
     public bool isProvoke = true;
+    public bool isAD = false;
 
     private void Awake()
     {
@@ -249,6 +272,18 @@ public class MonsterController : Monster, IInteraction
         ChangeState(MonsterState.Idle);
     }
 
+    private void Start()
+    {
+        if (isAD)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                GameObject bullet = Instantiate(arrowPrefab, arrowPos);
+                arrowStack.Push(bullet);
+            }
+        }
+    }
+
     private void Update()
     {
         stateMachine.Update();
@@ -270,8 +305,41 @@ public class MonsterController : Monster, IInteraction
         viewDetector.FindAttackTarget();
         if (viewDetector.AttackTarget != null)
         {
-            viewDetector.AttackTarget.GetComponent<UnitController>().TakeHit(atk);
+            if(Random.value < critRate)
+            {
+                viewDetector.AttackTarget.GetComponent<UnitController>().TakeHit(atk * critDmg, TextType.Critical);
+            }
+            else
+            {
+                viewDetector.AttackTarget.GetComponent<UnitController>().TakeHit(atk, TextType.Normal);
+            }
         }
+    }
+
+    public void ExitArrow(ParticleSystem effect)
+    {
+        viewDetector.FindAttackTarget();
+        if (viewDetector.AttackTarget != null)
+        {
+            GameObject arrow = arrowStack.Pop();
+            arrow.transform.position = arrowPos.position;
+            if (viewDetector.AttackTarget.TryGetComponent(out UnitController controller))
+            {
+                if (arrow.TryGetComponent(out MonsterArrow a))
+                {
+                    a.SetTarget(this, controller, skill[0]);
+                }
+            }
+            arrow.SetActive(true);
+            arrow.transform.SetParent(null);
+        }
+    }
+
+    public void EnterArrow(GameObject arrow)
+    {
+        arrow.SetActive(false);
+        arrow.transform.parent = transform;
+        arrowStack.Push(arrow);
     }
 
     public void DeBuff(UseCard card)

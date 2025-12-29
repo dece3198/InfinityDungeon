@@ -105,6 +105,9 @@ public class Mercenary : ScriptableObject
             case MercenaryClass.SubTankerBot:
                 atk = 10; atkSpeed = 2f; def = 10; speed = 1; hp = 100; skillDamage = 4f; criticalPercent = 0.5f; criticalDamage = 2f;
                 break;
+            case MercenaryClass.ADBot:
+                atk = 7; atkSpeed = 2f; def = 10; speed = 1; hp = 50; skillDamage = 4f; criticalPercent = 0.75f; criticalDamage = 2f;
+                break;
         }
 
         float RankValue(Rank r)

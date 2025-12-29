@@ -71,7 +71,7 @@ Material:
     - _DrawOrder: 0
     - _DstBlend: 10
     - _DstBlendAlpha: 10
-    - _Fade: 1.0237237
+    - _Fade: 1.0082731
     - _Lerp: 0.195
     - _QueueControl: 0
     - _QueueOffset: 0

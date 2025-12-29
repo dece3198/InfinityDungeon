@@ -29,13 +29,16 @@ public class ViewDetector : MonoBehaviour
         {
             // 대상이 여전히 존재하고 활성화되어 있으며, 거리 안에 있다면 유지
             float dist = Vector3.Distance(transform.position, Target.transform.position);
-            if (Target.activeSelf)
+            if (Target.TryGetComponent(out MonsterController m))
             {
-                return; // 기존 타겟 계속 사용
+                if(m.monsterState != MonsterState.Die)
+                {
+                    return; // 기존 타겟 계속 사용
+                }
             }
 
             // 타겟이 사라지거나 너무 멀리 벗어나면 초기화
-            attackTarget = null;
+            target = null;
         }
 
         Collider[] targets = Physics.OverlapSphere(transform.position, radius, layerMask);
@@ -100,13 +103,16 @@ public class ViewDetector : MonoBehaviour
     public void FindAttackTarget()
     {
         //기존 타겟 유지 조건
-        if (attackTarget != null)
+        if (AttackTarget != null)
         {
             // 대상이 여전히 존재하고 활성화되어 있으며, 거리 안에 있다면 유지
             float dist = Vector3.Distance(transform.position, attackTarget.transform.position);
-            if (attackTarget.activeSelf && dist <= attackRadius * 2)
+            if (AttackTarget.TryGetComponent(out MonsterController m))
             {
-                return; // 기존 타겟 계속 사용
+                if (m.monsterState != MonsterState.Die)
+                {
+                    return; // 기존 타겟 계속 사용
+                }
             }
 
             // 타겟이 사라지거나 너무 멀리 벗어나면 초기화
